@@ -13,10 +13,10 @@ namespace TextToCalcExpression
 	public class ExpressionBuilder
 	{
 		Dictionary<string, ParameterExpression> _parameters;
-		Dictionary<string, ParameterInfo> _mapParam;
 		TokenTree _tree;
 		ParameterInfo[] _parametersInfo;
 		ParameterInfo _returnType;
+		int _curr_index = 0;
 		
 		public ExpressionBuilder()
 		{
@@ -25,7 +25,6 @@ namespace TextToCalcExpression
 		public Expression<T> Create<T>(string expression)
 		{
 			_parameters = new Dictionary<string, ParameterExpression>();
-			_mapParam = new Dictionary<string, ParameterInfo>();
 			_tree = new TokenTree(GetTokens(expression));
 			this.GetExpressionSpec(typeof(T));
 			Expression body = ProcessToken(_tree.Root);
@@ -41,7 +40,6 @@ namespace TextToCalcExpression
 			
 			_returnType = mInfo.ReturnParameter;
 			_parametersInfo = mInfo.GetParameters();
-
 		}
 		
 		private IEnumerable<Token> GetTokens(string expression)
@@ -91,6 +89,23 @@ namespace TextToCalcExpression
 				
 				return par;
 			}
+		}
+		
+		private Type InferParameterType(Token node)
+		{
+			if (_parametersInfo.Length < _curr_index)
+			{
+				ParameterInfo info = _parametersInfo[_curr_index];
+				
+				_curr_index++;
+				
+				if (info.IsRetval)
+					return InferParameterType(node);
+				else
+					return info.ParameterType;
+			}
+			else
+				return null;
 		}
 		
 		private Expression CreateConstant(Token node)
