@@ -4,7 +4,9 @@ using System.Text.RegularExpressions;
 namespace TextToCalcExpression.Tokens
 {
 	
-	public enum TokenType { NUM = 0, PAR = 1, SUM = 2, SUB = 3, MULT = 4, DIV = 5, REM = 6, POW = 7, STARTPAR = 8, ENDPAR = 9, EOF = 256}
+	public enum TokenType { NUM = 0, PAR = 1, SUM = 2, SUB = 3, MULT = 4, DIV = 5, REM = 6, POW = 7, STARTPAR = 8, ENDPAR = 9,
+		AND = 10, OR = 11, NOT = 12, EQUALS = 13, NOTEQUALS, 14, LOWER = 15, GREATER = 16, LOWEROREQUALS = 17, GREATEROREQUALS = 18
+			, EOF = 256}
 	public enum TokenGroup { Operator = 0, Identifier = 1, Literal = 2, Separator = 3 }
 	
 	/// <summary>
