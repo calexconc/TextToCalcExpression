@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <ProjectGuid>{9DA3E308-F7E8-40D1-8C26-316C77A62E8B}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <OutputType>Library</OutputType>
+    <RootNamespace>TextToCalcExpression</RootNamespace>
+    <AssemblyName>TextToCalcExpression</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>Full</DebugType>
+    <Optimize>False</Optimize>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <DebugSymbols>False</DebugSymbols>
+    <DebugType>None</DebugType>
+    <Optimize>True</Optimize>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Collections\BinaryNode.cs" />
+    <Compile Include="Collections\BinaryTree.cs" />
+    <Compile Include="ExpressionBuilder.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tokens\DivToken.cs" />
+    <Compile Include="Tokens\EndParToken.cs" />
+    <Compile Include="Tokens\EofToken.cs" />
+    <Compile Include="Tokens\MultToken.cs" />
+    <Compile Include="Tokens\NumToken.cs" />
+    <Compile Include="Tokens\ParToken.cs" />
+    <Compile Include="Tokens\PowToken.cs" />
+    <Compile Include="Tokens\RemToken.cs" />
+    <Compile Include="Tokens\StartParToken.cs" />
+    <Compile Include="Tokens\SubToken.cs" />
+    <Compile Include="Tokens\SumToken.cs" />
+    <Compile Include="Tokens\Token.cs" />
+    <Compile Include="Tokens\Tokenizer.cs" />
+    <Compile Include="TokenTree.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Collections" />
+    <Folder Include="Tokens" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="license.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
+</Project>
