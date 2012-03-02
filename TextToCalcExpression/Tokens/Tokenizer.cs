@@ -10,7 +10,6 @@ namespace TextToCalcExpression.Tokens
 	public class Tokenizer
 	{
 		private string _text;
-		private Regex _isnumeric = new Regex(@"(^(\+?\-? *[0-9]+)([,0-9 ]*)([0-9 ])*$)|(^ *$)");
 		
 		public Tokenizer(string text)
 		{
@@ -46,11 +45,10 @@ namespace TextToCalcExpression.Tokens
 		private IEnumerable<string> ScanText()
 		{
 			string curr = string.Empty;
-			char? previous = null;
 			
 			foreach (char item in this._text)
 			{
-				if (IsOperationSymbol(item))
+				if (IsMathOperationSymbol(item))
 				{
 					if (curr != string.Empty)
 						yield return curr;
@@ -58,25 +56,39 @@ namespace TextToCalcExpression.Tokens
 					yield return item.ToString();
 					
 					curr = string.Empty;
-					previous = item;
 				}
-				else if (item != ' ')
+				else if (IsBoolOperationSymbol(item.ToString()))
 				{
-					previous = item;
-					curr += item;
+					yield return curr;
+					curr = item.ToString();
 				}
+				else if (IsBoolOperationSymbol(curr))
+				{
+					if (IsBoolOperationSymbol(curr+item))
+					{
+						yield return curr+item;
+						curr = string.Empty;
+					}
+					else
+					{
+						yield return curr;
+						curr = item.ToString();
+					}
+				}
+				else if (item == ' ')
+				{
+					yield return curr;
+					curr = string.Empty;
+				}
+				else
+					curr += item;
 			}
 			
 			if (curr != string.Empty)
 				yield return curr;
 		}
 		
-		private bool IsNumeric(string value)
-		{
-			return _isnumeric.IsMatch(value);
-		}
-		
-		private bool IsOperationSymbol(char value)
+		private bool IsMathOperationSymbol(char value)
 		{
 			switch (value)
 			{
@@ -88,6 +100,24 @@ namespace TextToCalcExpression.Tokens
 				case '(':
 				case ')':
 				case '^':
+					return true;
+				default:
+					return false;
+			}		
+		}
+		
+		private bool IsBoolOperationSymbol(string value)
+		{
+			switch (value)
+			{
+				case "==":
+				case "!=":
+				case "<":
+				case ">":
+				case "=<":
+				case ">=":
+				case "!":
+				case "=":
 					return true;
 				default:
 					return false;

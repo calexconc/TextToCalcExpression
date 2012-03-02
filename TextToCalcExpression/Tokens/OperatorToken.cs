@@ -3,19 +3,20 @@
 namespace TextToCalcExpression.Tokens
 {
 	/// <summary>
-	/// Description of DivToken.
+	/// Description of OperatorToken.
 	/// </summary>
-	public class DivToken: Token
+	public class OperatorToken : Token
 	{
-		public DivToken()
+		public OperatorToken(TokenType ttype)
 		{
-			this.Text = "/";
+			this._ttoken = ttype;
+			this.Text = ttype.ToString();
 		}
 		
+		private TokenType _ttoken;
+		
 		public override TokenType TToken {
-			get {
-				return TokenType.DIV;
-			}
+			get { return _ttoken; }
 		}
 		
 		public override TokenGroup GToken {
