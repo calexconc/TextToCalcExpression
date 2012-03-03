@@ -64,10 +64,29 @@ namespace TextToCalcExpression
 					return DefineDiv(node);
 				case TokenType.POW: 
 					return DefinePow(node);
+				case TokenType.AND:
+					return DefineAnd(node);
+				case TokenType.OR:
+					return DefineOr(node);
+				case TokenType.NOT:
+					return DefineNot(node);
+				case TokenType.EQUALS:
+					return DefineEqual(node);
+				case TokenType.NOTEQUALS:
+					return DefineNotEqual(node);
+				case TokenType.GREATER:
+					return DefineGreater(node);
+				case TokenType.GREATEROREQUALS:
+					return DefineGreaterOrEqual(node);
+				case TokenType.LOWER:
+					return DefineLower(node);
+				case TokenType.LOWEROREQUALS:
+					return DefineLowerOrEqual(node);
 				case TokenType.REM: break;
 				case TokenType.PAR: 
 					return CreateParameter(node.Value);
 				case TokenType.NUM: 
+				case TokenType.BOOL: 
 					return CreateConstant(node.Value);
 				case TokenType.STARTPAR: 
 					break;
@@ -110,9 +129,16 @@ namespace TextToCalcExpression
 		
 		private Expression CreateConstant(Token node)
 		{
-			NumToken tok = (NumToken) node;
-			
-			return Expression.Constant(tok.GetValue(), tok.ParameterType);
+			if (node.TToken == TokenType.BOOL)
+			{
+				BoolToken tok = (BoolToken) node;
+				return Expression.Constant(tok.GetValue(), typeof(bool));
+			}
+			else
+			{
+				NumToken tok = (NumToken) node;
+				return Expression.Constant(tok.GetValue(), tok.ParameterType);
+			}
 		}
 		
 		private Expression DefineSum(BinaryNode<Token> node)
@@ -138,6 +164,51 @@ namespace TextToCalcExpression
 		private Expression DefinePow(BinaryNode<Token> node)
 		{
 			return BinaryExpression.Power(ProcessToken(node.Left), ProcessToken(node.Right));
+		}
+		
+		private Expression DefineAnd(BinaryNode<Token> node)
+		{
+			return BinaryExpression.AndAlso(ProcessToken(node.Left), ProcessToken(node.Right));
+		}
+		
+		private Expression DefineOr(BinaryNode<Token> node)
+		{
+			return BinaryExpression.OrElse(ProcessToken(node.Left), ProcessToken(node.Right));
+		}
+		
+		private Expression DefineNot(BinaryNode<Token> node)
+		{
+			return BinaryExpression.Negate(ProcessToken(node.Right));
+		}
+		
+		private Expression DefineNotEqual(BinaryNode<Token> node)
+		{
+			return BinaryExpression.NotEqual(ProcessToken(node.Left), ProcessToken(node.Right));
+		}
+		
+		private Expression DefineEqual(BinaryNode<Token> node)
+		{
+			return BinaryExpression.Equal(ProcessToken(node.Left), ProcessToken(node.Right));
+		}
+		
+		private Expression DefineGreater(BinaryNode<Token> node)
+		{
+			return BinaryExpression.GreaterThan(ProcessToken(node.Left), ProcessToken(node.Right));
+		}
+		
+		private Expression DefineLower(BinaryNode<Token> node)
+		{
+			return BinaryExpression.LessThan(ProcessToken(node.Left), ProcessToken(node.Right));
+		}
+		
+		private Expression DefineGreaterOrEqual(BinaryNode<Token> node)
+		{
+			return BinaryExpression.GreaterThanOrEqual(ProcessToken(node.Left), ProcessToken(node.Right));
+		}
+		
+		private Expression DefineLowerOrEqual(BinaryNode<Token> node)
+		{
+			return BinaryExpression.LessThanOrEqual(ProcessToken(node.Left), ProcessToken(node.Right));
 		}
 		
 		private Expression HandleRem(LinkedListNode<Token> node)
