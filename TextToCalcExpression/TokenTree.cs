@@ -41,7 +41,7 @@ namespace TextToCalcExpression
 					break;
 				case TokenType.AND:
 				case TokenType.OR:
-					HandleSumSub(node.Value);
+					currentnode = HandleAndOr(node);
 					break;
 				case TokenType.MULT:
 				case TokenType.DIV: 
@@ -121,58 +121,6 @@ namespace TextToCalcExpression
 			return currentnode;
 		}
 		
-		private LinkedListNode<Token> HandleComparisons(LinkedListNode<Token> node)
-		{
-			LinkedListNode<Token> currentnode = node;
-			BinaryNode<Token> cnode = this.CreateNode(node.Value);
-			cnode.Left = _roots.Pop();
-			cnode.Left.Root = cnode;
-			
-			if (_roots.Count > 0)
-			{
-				BinaryNode<Token> rootnode = _roots.Pop();
-				rootnode.Right = cnode;
-				cnode.Root = rootnode;
-			}
-			
-			currentnode = HandleComparisonsRigthSide(currentnode, cnode);
-			this.CheckRoot(cnode);
-			
-			return currentnode;
-		}
-		
-		private LinkedListNode<Token> HandleComparisonsRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
-		{
-			LinkedListNode<Token> nextopnode = GetNextOperaror(node);
-			LinkedListNode<Token> currentnode = node;
-			BinaryNode<Token> candnode = null;
-			
-			switch (nextopnode.Value.TToken)
-			{
-				case TokenType.AND:
-				case TokenType.OR: 
-					candnode = this.CreateNode(currentnode.Next.Value);
-					currentnode = currentnode.Next;
-					cnode.Right = candnode;
-					candnode.Root = cnode;
-					_roots.Push(this.Root);
-					break;
-				case TokenType.STARTPAR: 
-					currentnode = HandleStarPar(nextopnode);
-					candnode = _roots.Pop();
-					cnode.Right = candnode;
-					candnode.Root = cnode;
-					_roots.Push(cnode);
-					_roots.Push(candnode);
-					break;
-				default:
-					_roots.Push(cnode);
-					break;
-			}
-			
-			return currentnode;
-		}
-		
 		private LinkedListNode<Token> HandleMultDivRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
 		{
 			LinkedListNode<Token> nextopnode = GetNextOperaror(node);
@@ -234,6 +182,64 @@ namespace TextToCalcExpression
 			this.CheckRoot(cnode);
 		}
 		
+		private LinkedListNode<Token> HandleAndOr(LinkedListNode<Token> node)
+		{
+			LinkedListNode<Token> currentnode = node;
+			BinaryNode<Token> cnode = this.CreateNode(node.Value);
+			BinaryNode<Token> candnode = _roots.Pop();
+			
+			if (_roots.Count > 0)
+			{
+				BinaryNode<Token> rootnode = _roots.Pop();
+				rootnode.Right = candnode;
+				candnode.Root = rootnode;
+				cnode.Left = rootnode;
+			}
+			else
+			{
+				cnode.Left = candnode;
+				candnode.Root = cnode;
+			}
+			
+			currentnode = HandleAndOrRigthSide(currentnode, cnode);
+			_roots.Push(cnode);
+			this.CheckRoot(cnode);
+			
+			return currentnode;
+		}
+		
+		
+		private LinkedListNode<Token> HandleComparisons(LinkedListNode<Token> node)
+		{
+			LinkedListNode<Token> currentnode = node;
+			BinaryNode<Token> cnode = this.CreateNode(node.Value);
+			cnode.Left = _roots.Pop();
+			cnode.Left.Root = cnode;
+			
+			if (_roots.Count > 0)
+			{
+				BinaryNode<Token> rootnode = _roots.Pop();
+				rootnode.Right = cnode;
+				cnode.Root = rootnode;
+			}
+			
+	//		currentnode = HandleComparisonsRigthSide(currentnode, cnode);
+			this.CheckRoot(cnode);
+			
+			return currentnode;
+		}
+		
+		private LinkedListNode<Token> HandleAndOrRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
+		{
+			LinkedListNode<Token> currnode = GetInAndOrLastNode(node.Next);
+			TokenTree ntree = new TokenTree(GetInAndOr(node));
+			
+			cnode.Right = ntree.Root;
+			ntree.Root.Root = cnode.Right;
+			
+			return currnode;
+		}
+		
 		private void HandleParConst(Token token)
 		{
 			BinaryNode<Token> cnode = this.CreateNode(token);
@@ -245,10 +251,15 @@ namespace TextToCalcExpression
 			if (_roots.Count > 0)
 			{
 				BinaryNode<Token> cnode = _roots.Pop();
-				BinaryNode<Token> rootnode = _roots.Pop();
 				
-				rootnode.Right = cnode;
-				cnode.Root = rootnode;
+				if (_roots.Count > 0)
+				{
+					BinaryNode<Token> rootnode = _roots.Pop();
+					rootnode.Right = cnode;
+					cnode.Root = rootnode;
+				}
+				else if (this.Root == null)
+					this.Root = cnode;
 			}
 		}
 		
@@ -280,6 +291,45 @@ namespace TextToCalcExpression
 			
 			return current;
 		}
+		
+		private IEnumerable<Token> GetInAndOr(LinkedListNode<Token> node)
+		{
+			LinkedListNode<Token> current = node;
+			int level = 0;
+				
+			while ((current.Next.Value.TToken != TokenType.AND && current.Next.Value.TToken != TokenType.OR && current.Next.Value.TToken != TokenType.EOF) || level > 0)
+			{
+				current = current.Next;
+
+				yield return current.Value;
+				
+				if (current.Value.TToken == TokenType.STARTPAR)
+					level++;
+				else if (current.Value.TToken == TokenType.ENDPAR)
+					level--;
+			}
+			
+			yield return new EofToken();
+		}
+		
+		private LinkedListNode<Token> GetInAndOrLastNode(LinkedListNode<Token> node)
+		{
+			LinkedListNode<Token> current = node;
+			int level = 0;
+				
+			while ((current.Next.Value.TToken != TokenType.AND && current.Next.Value.TToken != TokenType.OR && current.Next.Value.TToken != TokenType.EOF)|| level > 0)
+			{
+				current = current.Next;
+			
+				if (current.Value.TToken == TokenType.STARTPAR)
+					level++;
+				else if (current.Value.TToken == TokenType.ENDPAR)
+					level--;
+			}
+			
+			return current;
+		}
+		
 		
 		private IEnumerable<Token> GetInParentesis(LinkedListNode<Token> node)
 		{
