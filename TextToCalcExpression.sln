@@ -1,8 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-# SharpDevelop 4.2.0.8528-beta
+# SharpDevelop 4.2.0.8649-Beta 2
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextToCalcExpression", "TextToCalcExpression\TextToCalcExpression.csproj", "{9DA3E308-F7E8-40D1-8C26-316C77A62E8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{3420A49F-9BFE-4092-8F57-C364A39E5378}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,5 +16,9 @@ Global
 		{9DA3E308-F7E8-40D1-8C26-316C77A62E8B}.Debug|x86.ActiveCfg = Debug|x86
 		{9DA3E308-F7E8-40D1-8C26-316C77A62E8B}.Release|x86.Build.0 = Release|x86
 		{9DA3E308-F7E8-40D1-8C26-316C77A62E8B}.Release|x86.ActiveCfg = Release|x86
+		{3420A49F-9BFE-4092-8F57-C364A39E5378}.Debug|x86.Build.0 = Debug|x86
+		{3420A49F-9BFE-4092-8F57-C364A39E5378}.Debug|x86.ActiveCfg = Debug|x86
+		{3420A49F-9BFE-4092-8F57-C364A39E5378}.Release|x86.Build.0 = Release|x86
+		{3420A49F-9BFE-4092-8F57-C364A39E5378}.Release|x86.ActiveCfg = Release|x86
 	EndGlobalSection
 EndGlobal

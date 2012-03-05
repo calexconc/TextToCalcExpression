@@ -15,6 +15,8 @@ namespace TextToCalcExpression
 		{
 			_roots = new Stack<BinaryNode<Token>>();
 			this.Populate(tokens);
+			
+	//		var xx = (1==2) == ((2!=3) != false);
 		}
 		
 		protected override void Populate(IEnumerable<Token> values)
@@ -37,18 +39,31 @@ namespace TextToCalcExpression
 				case TokenType.SUB: 
 					HandleSumSub(node.Value);
 					break;
+				case TokenType.AND:
+				case TokenType.OR:
+					HandleSumSub(node.Value);
+					break;
 				case TokenType.MULT:
 				case TokenType.DIV: 
 					currentnode = this.HandleMultDiv(currentnode);
 					break;
+				case TokenType.NOT:
+					break;
 				case TokenType.POW: 
 				case TokenType.REM:
+					break;
+				case TokenType.EQUALS:
+				case TokenType.NOTEQUALS:
+				case TokenType.GREATER:
+				case TokenType.GREATEROREQUALS:
+				case TokenType.LOWER:
+				case TokenType.LOWEROREQUALS:
+					currentnode = HandleComparisons(currentnode);
 					break;
 				case TokenType.STARTPAR: 
 					currentnode = HandleStarPar(currentnode);
 					break;
 				case TokenType.ENDPAR: 
-					
 					break;
 				case TokenType.PAR:
 				case TokenType.NUM:
@@ -88,7 +103,6 @@ namespace TextToCalcExpression
 		
 		private LinkedListNode<Token> HandleMultDiv(LinkedListNode<Token> node)
 		{
-			LinkedListNode<Token> nextopnode = GetNextOperaror(node);
 			LinkedListNode<Token> currentnode = node;
 			BinaryNode<Token> cnode = this.CreateNode(node.Value);
 			cnode.Left = _roots.Pop();
@@ -103,6 +117,58 @@ namespace TextToCalcExpression
 			
 			currentnode = HandleMultDivRigthSide(currentnode, cnode);
 			this.CheckRoot(cnode);
+			
+			return currentnode;
+		}
+		
+		private LinkedListNode<Token> HandleComparisons(LinkedListNode<Token> node)
+		{
+			LinkedListNode<Token> currentnode = node;
+			BinaryNode<Token> cnode = this.CreateNode(node.Value);
+			cnode.Left = _roots.Pop();
+			cnode.Left.Root = cnode;
+			
+			if (_roots.Count > 0)
+			{
+				BinaryNode<Token> rootnode = _roots.Pop();
+				rootnode.Right = cnode;
+				cnode.Root = rootnode;
+			}
+			
+			currentnode = HandleComparisonsRigthSide(currentnode, cnode);
+			this.CheckRoot(cnode);
+			
+			return currentnode;
+		}
+		
+		private LinkedListNode<Token> HandleComparisonsRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
+		{
+			LinkedListNode<Token> nextopnode = GetNextOperaror(node);
+			LinkedListNode<Token> currentnode = node;
+			BinaryNode<Token> candnode = null;
+			
+			switch (nextopnode.Value.TToken)
+			{
+				case TokenType.AND:
+				case TokenType.OR: 
+					candnode = this.CreateNode(currentnode.Next.Value);
+					currentnode = currentnode.Next;
+					cnode.Right = candnode;
+					candnode.Root = cnode;
+					_roots.Push(this.Root);
+					break;
+				case TokenType.STARTPAR: 
+					currentnode = HandleStarPar(nextopnode);
+					candnode = _roots.Pop();
+					cnode.Right = candnode;
+					candnode.Root = cnode;
+					_roots.Push(cnode);
+					_roots.Push(candnode);
+					break;
+				default:
+					_roots.Push(cnode);
+					break;
+			}
 			
 			return currentnode;
 		}

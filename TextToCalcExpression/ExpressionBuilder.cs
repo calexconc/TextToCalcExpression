@@ -97,46 +97,45 @@ namespace TextToCalcExpression
 			return null;
 		}
 		
-		private Expression CreateParameter(Token node)
+		private Expression CreateParameter(Token token)
 		{
-			if (_parameters.ContainsKey(node.Text))
-				return _parameters[node.Text];
+			if (_parameters.ContainsKey(token.Text))
+				return _parameters[token.Text];
 			else
 			{
-				ParameterExpression par = Expression.Parameter(((ParToken)node).ParameterType, node.Text);
-				_parameters.Add(node.Text, par);
+				this.InferParameterType(token);
+				ParameterExpression par = Expression.Parameter(((ParToken)token).ParameterType, token.Text);
+				_parameters.Add(token.Text, par);
 				
 				return par;
 			}
 		}
 		
-		private Type InferParameterType(Token node)
+		private void InferParameterType(Token token)
 		{
-			if (_parametersInfo.Length < _curr_index)
+			if (_curr_index < _parametersInfo.Length)
 			{
 				ParameterInfo info = _parametersInfo[_curr_index];
 				
 				_curr_index++;
 				
 				if (info.IsRetval)
-					return InferParameterType(node);
+					InferParameterType(token);
 				else
-					return info.ParameterType;
+					((ParToken)token).ParameterType = info.ParameterType;
 			}
-			else
-				return null;
 		}
 		
-		private Expression CreateConstant(Token node)
+		private Expression CreateConstant(Token token)
 		{
-			if (node.TToken == TokenType.BOOL)
+			if (token.TToken == TokenType.BOOL)
 			{
-				BoolToken tok = (BoolToken) node;
+				BoolToken tok = (BoolToken) token;
 				return Expression.Constant(tok.GetValue(), typeof(bool));
 			}
 			else
 			{
-				NumToken tok = (NumToken) node;
+				NumToken tok = (NumToken) token;
 				return Expression.Constant(tok.GetValue(), tok.ParameterType);
 			}
 		}
