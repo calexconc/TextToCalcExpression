@@ -37,7 +37,7 @@ namespace TextToCalcExpression
 			{
 				case TokenType.SUM: 
 				case TokenType.SUB: 
-					HandleSumSub(node.Value);
+					currentnode = HandleSumSub(node);
 					break;
 				case TokenType.AND:
 				case TokenType.OR:
@@ -92,33 +92,27 @@ namespace TextToCalcExpression
 				this.Root = this.Root.Root;
 		}
 		
-		private void HandleSumSub(Token token)
+		private LinkedListNode<Token> HandleSumSub(LinkedListNode<Token> node)
 		{
-			BinaryNode<Token> cnode = this.CreateNode(token);
-			BinaryNode<Token> candnode = _roots.Pop();
-			
-			if (_roots.Count > 0)
-			{
-				BinaryNode<Token>  rootnode = _roots.Pop();
-				
-				if (rootnode.Right== null)
+			Func<LinkedListNode<Token>,bool> func = inode => { 
+				switch (inode.Value.TToken)
 				{
-					rootnode.Right = cnode;
-					cnode.Root = rootnode;
+					case TokenType.SUM:
+					case TokenType.SUB:
+					case TokenType.EOF:
+						return false;
+					default:
+						return true;
 				}
-				else if (rootnode.Root == null)
-				{
-					cnode.Left = rootnode;
-					rootnode.Root = cnode;
-				}
-			}
-			
-			if (cnode.Left == null)
-				cnode.Left = candnode;
-			
-			candnode.Root = cnode;
+			};
+			LinkedListNode<Token> currentnode = node;
+			BinaryNode<Token> cnode = this.HandleCommon(node);
+			currentnode = HandleRigthSide(currentnode, cnode, func);
 			_roots.Push(cnode);
+			
 			this.CheckRoot(cnode);
+			
+			return currentnode;
 		}
 		
 		private LinkedListNode<Token> HandleMultDiv(LinkedListNode<Token> node)
@@ -244,24 +238,28 @@ namespace TextToCalcExpression
 		private LinkedListNode<Token> HandleRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode, Func<LinkedListNode<Token>,bool> func)
 		{
 			LinkedListNode<Token> currnode = null;
-			BinaryNode<Token> rnode = null;
+			BinaryNode<Token> rnode = HandleRigthSide(node, func);
 			
-			if (node.Next.Value.TToken == TokenType.STARTPAR)
-			{
-				currnode = this.HandleStarPar(node.Next);
-				rnode = _roots.Pop();
-			}
-			else
-			{
-				TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node.Next, func, 0));
-				currnode = _current.Previous;
-				rnode = ntree.Root;
-			}
-			
+			currnode = _current;
 			cnode.Right = rnode;
 			rnode.Root = cnode.Right;
 			
 			return currnode;
+		}
+		
+		private BinaryNode<Token> HandleRigthSide(LinkedListNode<Token> node, Func<LinkedListNode<Token>,bool> func)
+		{
+			BinaryNode<Token> rnode = null;
+			int level = 0;
+			
+			if (node.Next.Value.TToken == TokenType.STARTPAR)
+				level = 1;
+			
+			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node.Next, func, level));
+			_current = _current.Previous;
+			rnode = ntree.Root;
+			
+			return rnode;
 		}
 		
 		private LinkedListNode<Token> HandleStarPar(LinkedListNode<Token> node)
@@ -275,7 +273,7 @@ namespace TextToCalcExpression
 						return true;
 				}
 			};
-			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node, func, 1));
+			TokenTree ntree = new TokenTree(GetParExpressionTokens(node, func));
 			LinkedListNode<Token> currnode = _current;
 			BinaryNode<Token> cnode = ntree.Root;
 			
@@ -288,6 +286,28 @@ namespace TextToCalcExpression
 		{
 			LinkedListNode<Token> current = node;
 			int level = starparlevel;
+				
+			while (func(current) || level > 0)
+			{
+				yield return current.Value;
+				
+				current = current.Next;
+			
+				if (current.Value.TToken == TokenType.STARTPAR)
+					level++;
+				else if (current.Value.TToken == TokenType.ENDPAR)
+					level--;
+			}
+			
+			_current = current;
+			
+			yield return new EofToken();
+		}
+		
+		private IEnumerable<Token> GetParExpressionTokens(LinkedListNode<Token> node, Func<LinkedListNode<Token>,bool> func)
+		{
+			LinkedListNode<Token> current = node;
+			int level = 1;
 				
 			while (func(current) || level > 0)
 			{
