@@ -11,12 +11,12 @@ namespace TextToCalcExpression
 	/// </summary>
 	public class TokenTree : BinaryTree<Token>
 	{	
+		private LinkedListNode<Token> _current;
+		
 		public TokenTree(IEnumerable<Token> tokens)
 		{
 			_roots = new Stack<BinaryNode<Token>>();
 			this.Populate(tokens);
-			
-	//		var xx = (1==2) == ((2!=3) != false);
 		}
 		
 		protected override void Populate(IEnumerable<Token> values)
@@ -209,6 +209,7 @@ namespace TextToCalcExpression
 		}
 		
 		
+		
 		private LinkedListNode<Token> HandleComparisons(LinkedListNode<Token> node)
 		{
 			LinkedListNode<Token> currentnode = node;
@@ -223,22 +224,14 @@ namespace TextToCalcExpression
 				cnode.Root = rootnode;
 			}
 			
-	//		currentnode = HandleComparisonsRigthSide(currentnode, cnode);
+			currentnode = HandleComparisonsRigthSide(currentnode, cnode);
 			this.CheckRoot(cnode);
 			
 			return currentnode;
 		}
 		
-		private LinkedListNode<Token> HandleAndOrRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
-		{
-			LinkedListNode<Token> currnode = GetInAndOrLastNode(node.Next);
-			TokenTree ntree = new TokenTree(GetInAndOr(node));
-			
-			cnode.Right = ntree.Root;
-			ntree.Root.Root = cnode.Right;
-			
-			return currnode;
-		}
+		
+		
 		
 		private void HandleParConst(Token token)
 		{
@@ -263,10 +256,64 @@ namespace TextToCalcExpression
 			}
 		}
 		
+		private LinkedListNode<Token> HandleComparisonsRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
+		{
+			Func<LinkedListNode<Token>,bool> func = inode => { 
+				switch (inode.Next.Value.TToken)
+				{
+					case TokenType.AND:
+					case TokenType.OR:
+					case TokenType.EOF:
+						return false;
+					default:
+						return true;
+				}
+			};
+			
+			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node, func, 0));
+			LinkedListNode<Token> currnode = _current;
+			
+			cnode.Right = ntree.Root;
+			ntree.Root.Root = cnode.Right;
+			
+			return currnode;
+		}
+		
+		private LinkedListNode<Token> HandleAndOrRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
+		{
+			Func<LinkedListNode<Token>,bool> func = inode => { 
+				switch (inode.Next.Value.TToken)
+				{
+					case TokenType.AND:
+					case TokenType.OR:
+					case TokenType.EOF:
+						return false;
+					default:
+						return true;
+				}
+			};
+			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node, func, 0));
+			LinkedListNode<Token> currnode = _current;
+			
+			cnode.Right = ntree.Root;
+			ntree.Root.Root = cnode.Right;
+			
+			return currnode;
+		}
+		
 		private LinkedListNode<Token> HandleStarPar(LinkedListNode<Token> node)
 		{
-			LinkedListNode<Token> currnode = GetEndParentesis(node);
-			TokenTree ntree = new TokenTree(GetInParentesis(node));
+			Func<LinkedListNode<Token>,bool> func = inode => { 
+				switch (inode.Next.Value.TToken)
+				{
+					case TokenType.ENDPAR:
+						return false;
+					default:
+						return true;
+				}
+			};
+			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node, func, 1));
+			LinkedListNode<Token> currnode = _current;
 			BinaryNode<Token> cnode = ntree.Root;
 			
 			_roots.Push(cnode);
@@ -274,69 +321,12 @@ namespace TextToCalcExpression
 			return currnode;
 		}
 		
-		private LinkedListNode<Token> GetEndParentesis(LinkedListNode<Token> node)
+		private IEnumerable<Token> GetRightSideExpressionTokens(LinkedListNode<Token> node, Func<LinkedListNode<Token>,bool> func, int starparlevel)
 		{
 			LinkedListNode<Token> current = node;
-			int level = 1;
-			
-			while (current.Value.TToken != TokenType.ENDPAR || level > 0)
-			{
-				current = current.Next;
+			int level = starparlevel;
 				
-				if (current.Value.TToken == TokenType.STARTPAR)
-					level++;
-				else if (current.Value.TToken == TokenType.ENDPAR)
-					level--;
-			}
-			
-			return current;
-		}
-		
-		private IEnumerable<Token> GetInAndOr(LinkedListNode<Token> node)
-		{
-			LinkedListNode<Token> current = node;
-			int level = 0;
-				
-			while ((current.Next.Value.TToken != TokenType.AND && current.Next.Value.TToken != TokenType.OR && current.Next.Value.TToken != TokenType.EOF) || level > 0)
-			{
-				current = current.Next;
-
-				yield return current.Value;
-				
-				if (current.Value.TToken == TokenType.STARTPAR)
-					level++;
-				else if (current.Value.TToken == TokenType.ENDPAR)
-					level--;
-			}
-			
-			yield return new EofToken();
-		}
-		
-		private LinkedListNode<Token> GetInAndOrLastNode(LinkedListNode<Token> node)
-		{
-			LinkedListNode<Token> current = node;
-			int level = 0;
-				
-			while ((current.Next.Value.TToken != TokenType.AND && current.Next.Value.TToken != TokenType.OR && current.Next.Value.TToken != TokenType.EOF)|| level > 0)
-			{
-				current = current.Next;
-			
-				if (current.Value.TToken == TokenType.STARTPAR)
-					level++;
-				else if (current.Value.TToken == TokenType.ENDPAR)
-					level--;
-			}
-			
-			return current;
-		}
-		
-		
-		private IEnumerable<Token> GetInParentesis(LinkedListNode<Token> node)
-		{
-			LinkedListNode<Token> current = node;
-			int level = 1;
-				
-			while (current.Value.TToken != TokenType.ENDPAR || level > 0)
+			while (func(current) || level > 0)
 			{
 				if (current.Value.TToken != TokenType.STARTPAR || level > 1)
 					yield return current.Value;
@@ -346,13 +336,12 @@ namespace TextToCalcExpression
 				if (current.Value.TToken == TokenType.STARTPAR)
 					level++;
 				else if (current.Value.TToken == TokenType.ENDPAR)
-				{
 					level--;
-					
-					if (level == 0)
-						yield return new EofToken();
-				}
 			}
+			
+			_current = current;
+			
+			yield return new EofToken();
 		}
 		
 		#endregion
