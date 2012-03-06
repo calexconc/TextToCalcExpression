@@ -74,7 +74,7 @@ namespace TextToCalcExpression.Tokens
 					yield return curr;
 					curr = string.Empty;
 				}
-				else
+				else if (item != ' ')
 				{
 					if (IsBoolOperationSymbol(curr))
 					{

@@ -83,17 +83,6 @@ namespace TextToCalcExpression
 				GenerateNodes(currentnode);
 		}
 		
-		private LinkedListNode<Token> GetNextOperaror(LinkedListNode<Token> node)
-		{
-			LinkedListNode<Token> curr = node.Next;
-			
-			while (curr != null && (curr.Value.GToken != TokenGroup.Operator && curr.Value.GToken != TokenGroup.Separator))
-			{
-				curr = curr.Next;
-			}
-		
-			return curr;
-		}
 		
 		private void CheckRoot(BinaryNode<Token> cnode)
 		{
@@ -101,58 +90,6 @@ namespace TextToCalcExpression
 				this.Root = cnode;
 			else if (this.Root != null && this.Root.Root !=null)
 				this.Root = this.Root.Root;
-		}
-		
-		private LinkedListNode<Token> HandleMultDiv(LinkedListNode<Token> node)
-		{
-			LinkedListNode<Token> currentnode = node;
-			BinaryNode<Token> cnode = this.CreateNode(node.Value);
-			cnode.Left = _roots.Pop();
-			cnode.Left.Root = cnode;
-			
-			if (_roots.Count > 0)
-			{
-				BinaryNode<Token> rootnode = _roots.Pop();
-				rootnode.Right = cnode;
-				cnode.Root = rootnode;
-			}
-			
-			currentnode = HandleMultDivRigthSide(currentnode, cnode);
-			this.CheckRoot(cnode);
-			
-			return currentnode;
-		}
-		
-		private LinkedListNode<Token> HandleMultDivRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
-		{
-			LinkedListNode<Token> nextopnode = GetNextOperaror(node);
-			LinkedListNode<Token> currentnode = node;
-			BinaryNode<Token> candnode = null;
-			
-			switch (nextopnode.Value.TToken)
-			{
-				case TokenType.SUM:
-				case TokenType.SUB: 
-					candnode = this.CreateNode(currentnode.Next.Value);
-					currentnode = currentnode.Next;
-					cnode.Right = candnode;
-					candnode.Root = cnode;
-					_roots.Push(this.Root);
-					break;
-				case TokenType.STARTPAR: 
-					currentnode = HandleStarPar(nextopnode);
-					candnode = _roots.Pop();
-					cnode.Right = candnode;
-					candnode.Root = cnode;
-					_roots.Push(cnode);
-					_roots.Push(candnode);
-					break;
-				default:
-					_roots.Push(cnode);
-					break;
-			}
-			
-			return currentnode;
 		}
 		
 		private void HandleSumSub(Token token)
@@ -184,26 +121,46 @@ namespace TextToCalcExpression
 			this.CheckRoot(cnode);
 		}
 		
+		private LinkedListNode<Token> HandleMultDiv(LinkedListNode<Token> node)
+		{
+			Func<LinkedListNode<Token>,bool> func = inode => { 
+				switch (inode.Value.TToken)
+				{
+					case TokenType.SUM:
+					case TokenType.SUB:
+					case TokenType.EOF:
+						return false;
+					default:
+						return true;
+				}
+			};
+			LinkedListNode<Token> currentnode = node;
+			BinaryNode<Token> cnode = this.HandleCommon(node);
+			
+			currentnode = HandleRigthSide(currentnode, cnode, func);
+			_roots.Push(cnode);
+			this.CheckRoot(cnode);
+			
+			return currentnode;
+		}
+		
 		private LinkedListNode<Token> HandleAndOr(LinkedListNode<Token> node)
 		{
+			Func<LinkedListNode<Token>,bool> func = inode => { 
+				switch (inode.Value.TToken)
+				{
+					case TokenType.AND:
+					case TokenType.OR:
+					case TokenType.EOF:
+						return false;
+					default:
+						return true;
+				}
+			};
 			LinkedListNode<Token> currentnode = node;
-			BinaryNode<Token> cnode = this.CreateNode(node.Value);
-			BinaryNode<Token> candnode = _roots.Pop();
+			BinaryNode<Token> cnode = this.HandleCommon(node);
 			
-			if (_roots.Count > 0)
-			{
-				BinaryNode<Token> rootnode = _roots.Pop();
-				rootnode.Right = candnode;
-				candnode.Root = rootnode;
-				cnode.Left = rootnode;
-			}
-			else
-			{
-				cnode.Left = candnode;
-				candnode.Root = cnode;
-			}
-			
-			currentnode = HandleAndOrRigthSide(currentnode, cnode);
+			currentnode = HandleRigthSide(currentnode, cnode, func);
 			_roots.Push(cnode);
 			this.CheckRoot(cnode);
 			
@@ -212,6 +169,35 @@ namespace TextToCalcExpression
 		
 		private LinkedListNode<Token> HandleComparisons(LinkedListNode<Token> node)
 		{
+			Func<LinkedListNode<Token>,bool> func = inode => { 
+				switch (inode.Value.TToken)
+				{
+					case TokenType.AND:
+					case TokenType.OR:
+					case TokenType.EQUALS:
+					case TokenType.NOTEQUALS:
+					case TokenType.GREATER:
+					case TokenType.GREATEROREQUALS:
+					case TokenType.LOWER:
+					case TokenType.LOWEROREQUALS:
+					case TokenType.EOF:
+						return false;
+					default:
+						return true;
+				}
+			};
+			LinkedListNode<Token> currentnode = node;
+			BinaryNode<Token> cnode = this.HandleCommon(node);
+			
+			currentnode = HandleRigthSide(currentnode, cnode, func);
+			_roots.Push(cnode);
+			this.CheckRoot(cnode);
+			
+			return currentnode;
+		}
+		
+		private BinaryNode<Token> HandleCommon(LinkedListNode<Token> node)
+		{
 			LinkedListNode<Token> currentnode = node;
 			BinaryNode<Token> cnode = this.CreateNode(node.Value);
 			BinaryNode<Token> candnode = _roots.Pop();
@@ -229,10 +215,7 @@ namespace TextToCalcExpression
 				candnode.Root = cnode;
 			}
 			
-			currentnode = HandleComparisonsRigthSide(currentnode, cnode);
-			this.CheckRoot(cnode);
-			
-			return currentnode;
+			return cnode;
 		}
 		
 		private void HandleParConst(Token token)
@@ -258,53 +241,25 @@ namespace TextToCalcExpression
 			}
 		}
 		
-		private LinkedListNode<Token> HandleComparisonsRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
+		private LinkedListNode<Token> HandleRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode, Func<LinkedListNode<Token>,bool> func)
 		{
-			Func<LinkedListNode<Token>,bool> func = inode => { 
-				switch (inode.Value.TToken)
-				{
-					case TokenType.AND:
-					case TokenType.OR:
-					case TokenType.EQUALS:
-					case TokenType.NOTEQUALS:
-					case TokenType.GREATER:
-					case TokenType.GREATEROREQUALS:
-					case TokenType.LOWER:
-					case TokenType.LOWEROREQUALS:
-					case TokenType.EOF:
-						return false;
-					default:
-						return true;
-				}
-			};
+			LinkedListNode<Token> currnode = null;
+			BinaryNode<Token> rnode = null;
 			
-			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node.Next, func, 0));
-			LinkedListNode<Token> currnode = _current.Previous;
+			if (node.Next.Value.TToken == TokenType.STARTPAR)
+			{
+				currnode = this.HandleStarPar(node.Next);
+				rnode = _roots.Pop();
+			}
+			else
+			{
+				TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node.Next, func, 0));
+				currnode = _current.Previous;
+				rnode = ntree.Root;
+			}
 			
-			cnode.Right = ntree.Root;
-			ntree.Root.Root = cnode.Right;
-			
-			return currnode;
-		}
-		
-		private LinkedListNode<Token> HandleAndOrRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
-		{
-			Func<LinkedListNode<Token>,bool> func = inode => { 
-				switch (inode.Value.TToken)
-				{
-					case TokenType.AND:
-					case TokenType.OR:
-					case TokenType.EOF:
-						return false;
-					default:
-						return true;
-				}
-			};
-			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node.Next, func, 0));
-			LinkedListNode<Token> currnode = _current.Previous;
-			
-			cnode.Right = ntree.Root;
-			ntree.Root.Root = cnode.Right;
+			cnode.Right = rnode;
+			rnode.Root = cnode.Right;
 			
 			return currnode;
 		}
@@ -312,7 +267,7 @@ namespace TextToCalcExpression
 		private LinkedListNode<Token> HandleStarPar(LinkedListNode<Token> node)
 		{
 			Func<LinkedListNode<Token>,bool> func = inode => { 
-				switch (inode.Next.Value.TToken)
+				switch (inode.Value.TToken)
 				{
 					case TokenType.ENDPAR:
 						return false;

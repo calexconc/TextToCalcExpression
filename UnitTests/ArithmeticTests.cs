@@ -50,5 +50,35 @@ namespace UnitTests
 			
 			Assert.AreEqual(func(16, 2), 8);
 		}
+		
+		[Test]
+		public void Poli3ArgsFunction_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int,int, int,int>> expression = builder.Create<Func<int,int, int, int>>("A * B+C");
+			Func<int,int, int, int> func = expression.Compile();
+			
+			Assert.AreEqual(func(16, 2, -2), 30);
+		}
+		
+		[Test]
+		public void Poli3ArgsPlusConstantFunction_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int,int, int,int>> expression = builder.Create<Func<int,int, int, int>>("A * B+C+6");
+			Func<int,int, int, int> func = expression.Compile();
+			
+			Assert.AreEqual(func(16, 2, -2), 36);
+		}
+		
+		[Test]
+		public void Poli3ArgsPlusConstantPlusParentesisFunction_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int,int, int,int>> expression = builder.Create<Func<int,int, int, int>>("A * (B+C)+6");
+			Func<int,int, int, int> func = expression.Compile();
+			
+			Assert.AreEqual(func(16, 2, -2), 6);
+		}
 	}
 }
