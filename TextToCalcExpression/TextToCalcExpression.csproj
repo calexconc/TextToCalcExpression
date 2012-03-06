@@ -43,7 +43,7 @@
     <Compile Include="Collections\BinaryNode.cs" />
     <Compile Include="Collections\BinaryTree.cs" />
     <Compile Include="ExpressionBuilder.cs" />
-    <Compile Include="ParceException.cs" />
+    <Compile Include="ParseException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tokens\BoolToken.cs" />
     <Compile Include="Tokens\EndParToken.cs" />

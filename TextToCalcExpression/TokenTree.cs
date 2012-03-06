@@ -77,8 +77,10 @@ namespace TextToCalcExpression
 					break;
 			}
 			
-			if (!eof)
+			if (currentnode.Value.TToken != TokenType.EOF)
 				GenerateNodes(currentnode.Next);
+			else if (!eof)
+				GenerateNodes(currentnode);
 		}
 		
 		private LinkedListNode<Token> GetNextOperaror(LinkedListNode<Token> node)
@@ -208,20 +210,23 @@ namespace TextToCalcExpression
 			return currentnode;
 		}
 		
-		
-		
 		private LinkedListNode<Token> HandleComparisons(LinkedListNode<Token> node)
 		{
 			LinkedListNode<Token> currentnode = node;
 			BinaryNode<Token> cnode = this.CreateNode(node.Value);
-			cnode.Left = _roots.Pop();
-			cnode.Left.Root = cnode;
+			BinaryNode<Token> candnode = _roots.Pop();
 			
 			if (_roots.Count > 0)
 			{
 				BinaryNode<Token> rootnode = _roots.Pop();
-				rootnode.Right = cnode;
-				cnode.Root = rootnode;
+				rootnode.Right = candnode;
+				candnode.Root = rootnode;
+				cnode.Left = rootnode;
+			}
+			else
+			{
+				cnode.Left = candnode;
+				candnode.Root = cnode;
 			}
 			
 			currentnode = HandleComparisonsRigthSide(currentnode, cnode);
@@ -229,9 +234,6 @@ namespace TextToCalcExpression
 			
 			return currentnode;
 		}
-		
-		
-		
 		
 		private void HandleParConst(Token token)
 		{
@@ -259,10 +261,16 @@ namespace TextToCalcExpression
 		private LinkedListNode<Token> HandleComparisonsRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
 		{
 			Func<LinkedListNode<Token>,bool> func = inode => { 
-				switch (inode.Next.Value.TToken)
+				switch (inode.Value.TToken)
 				{
 					case TokenType.AND:
 					case TokenType.OR:
+					case TokenType.EQUALS:
+					case TokenType.NOTEQUALS:
+					case TokenType.GREATER:
+					case TokenType.GREATEROREQUALS:
+					case TokenType.LOWER:
+					case TokenType.LOWEROREQUALS:
 					case TokenType.EOF:
 						return false;
 					default:
@@ -271,7 +279,7 @@ namespace TextToCalcExpression
 			};
 			
 			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node, func, 0));
-			LinkedListNode<Token> currnode = _current;
+			LinkedListNode<Token> currnode = _current.Previous;
 			
 			cnode.Right = ntree.Root;
 			ntree.Root.Root = cnode.Right;
@@ -282,7 +290,7 @@ namespace TextToCalcExpression
 		private LinkedListNode<Token> HandleAndOrRigthSide(LinkedListNode<Token> node, BinaryNode<Token> cnode)
 		{
 			Func<LinkedListNode<Token>,bool> func = inode => { 
-				switch (inode.Next.Value.TToken)
+				switch (inode.Value.TToken)
 				{
 					case TokenType.AND:
 					case TokenType.OR:
@@ -292,8 +300,8 @@ namespace TextToCalcExpression
 						return true;
 				}
 			};
-			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node, func, 0));
-			LinkedListNode<Token> currnode = _current;
+			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node.Next, func, 0));
+			LinkedListNode<Token> currnode = _current.Previous;
 			
 			cnode.Right = ntree.Root;
 			ntree.Root.Root = cnode.Right;

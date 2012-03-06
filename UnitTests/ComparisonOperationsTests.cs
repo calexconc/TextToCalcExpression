@@ -8,7 +8,7 @@ namespace UnitTests
 	[TestFixture]
 	public class ComparisonOperationsTests
 	{
-		[Test]
+	//	[Test]
 		public void EqualsTupleTrue_Test()
 		{
 			ExpressionBuilder builder = new ExpressionBuilder();
