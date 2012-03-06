@@ -52,6 +52,16 @@ namespace UnitTests
 		}
 		
 		[Test]
+		public void TwoArgsPower_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int,int, int>> expression = builder.Create<Func<int,int, int>>("A ^ B");
+			Func<int,int, int> func = expression.Compile();
+			
+			Assert.AreEqual(func(2, 3), 8);
+		}
+		
+		[Test]
 		public void Poli3ArgsFunction_Test()
 		{
 			ExpressionBuilder builder = new ExpressionBuilder();
@@ -99,6 +109,16 @@ namespace UnitTests
 			Func<int,int, int, int> func = expression.Compile();
 			
 			Assert.AreEqual(func(12, 2, -1), 18);
+		}
+		
+		[Test]
+		public void TwoMixedArgsPower_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int,int, int>> expression = builder.Create<Func<int,int, int>>("(A + 1) ^ B + 2");
+			Func<int,int, int> func = expression.Compile();
+			
+			Assert.AreEqual(func(2, 3), 29);
 		}
 	}
 }

@@ -82,7 +82,8 @@ namespace TextToCalcExpression
 					return DefineLower(node);
 				case TokenType.LOWEROREQUALS:
 					return DefineLowerOrEqual(node);
-				case TokenType.REM: break;
+				case TokenType.REM: 
+					return DefineRemainder(node);
 				case TokenType.PAR: 
 					return CreateParameter(node.Value);
 				case TokenType.NUM: 
@@ -162,7 +163,13 @@ namespace TextToCalcExpression
 		
 		private Expression DefinePow(BinaryNode<Token> node)
 		{
-			return BinaryExpression.Power(ProcessToken(node.Left), ProcessToken(node.Right));
+			Expression exp = BinaryExpression.Power(Expression.Convert(ProcessToken(node.Left), typeof(double))
+			                              , Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
 		}
 		
 		private Expression DefineAnd(BinaryNode<Token> node)
@@ -210,10 +217,16 @@ namespace TextToCalcExpression
 			return BinaryExpression.LessThanOrEqual(ProcessToken(node.Left), ProcessToken(node.Right));
 		}
 		
-		private Expression HandleRem(LinkedListNode<Token> node)
+		private Expression DefineRemainder(BinaryNode<Token> node)
 		{
+			MethodInfo info = typeof(Math).GetMethod("IEEERemainder");
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Left), typeof(double))
+			                              , Expression.Convert(ProcessToken(node.Right), typeof(double)));
 			
-			return null;
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
 		}
 		
 		#endregion

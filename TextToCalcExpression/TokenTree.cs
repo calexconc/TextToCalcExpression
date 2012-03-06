@@ -37,19 +37,19 @@ namespace TextToCalcExpression
 			{
 				case TokenType.SUM: 
 				case TokenType.SUB: 
-					currentnode = HandleSumSub(node);
+				case TokenType.MULT:
+				case TokenType.DIV: 
+					currentnode = this.HandleSumSubMultDiv(currentnode);
 					break;
 				case TokenType.AND:
 				case TokenType.OR:
 					currentnode = HandleAndOr(node);
 					break;
-				case TokenType.MULT:
-				case TokenType.DIV: 
-					currentnode = this.HandleMultDiv(currentnode);
-					break;
 				case TokenType.NOT:
 					break;
 				case TokenType.POW: 
+					currentnode = HandlePow(node);
+					break;
 				case TokenType.REM:
 					break;
 				case TokenType.EQUALS:
@@ -83,7 +83,6 @@ namespace TextToCalcExpression
 				GenerateNodes(currentnode);
 		}
 		
-		
 		private void CheckRoot(BinaryNode<Token> cnode)
 		{
 			if (this.Root == null && cnode.Value.GToken == TokenGroup.Operator)
@@ -92,50 +91,56 @@ namespace TextToCalcExpression
 				this.Root = this.Root.Root;
 		}
 		
-		private LinkedListNode<Token> HandleSumSub(LinkedListNode<Token> node)
+		private LinkedListNode<Token> HandleSumSubMultDiv(LinkedListNode<Token> node)
 		{
 			Func<LinkedListNode<Token>,bool> func = inode => { 
 				switch (inode.Value.TToken)
 				{
 					case TokenType.SUM:
 					case TokenType.SUB:
+					case TokenType.AND:
+					case TokenType.OR:
+					case TokenType.EQUALS:
+					case TokenType.NOTEQUALS:
+					case TokenType.GREATER:
+					case TokenType.GREATEROREQUALS:
+					case TokenType.LOWER:
+					case TokenType.LOWEROREQUALS:
 					case TokenType.EOF:
 						return false;
 					default:
 						return true;
 				}
 			};
-			LinkedListNode<Token> currentnode = node;
-			BinaryNode<Token> cnode = this.HandleCommon(node);
-			currentnode = HandleRigthSide(currentnode, cnode, func);
-			_roots.Push(cnode);
 			
-			this.CheckRoot(cnode);
-			
-			return currentnode;
+			return this.HandleBinaryOperation(node, func);
 		}
 		
-		private LinkedListNode<Token> HandleMultDiv(LinkedListNode<Token> node)
+		private LinkedListNode<Token> HandlePow(LinkedListNode<Token> node)
 		{
 			Func<LinkedListNode<Token>,bool> func = inode => { 
 				switch (inode.Value.TToken)
 				{
 					case TokenType.SUM:
 					case TokenType.SUB:
+					case TokenType.MULT:
+					case TokenType.DIV:
+					case TokenType.AND:
+					case TokenType.OR:
+					case TokenType.EQUALS:
+					case TokenType.NOTEQUALS:
+					case TokenType.GREATER:
+					case TokenType.GREATEROREQUALS:
+					case TokenType.LOWER:
+					case TokenType.LOWEROREQUALS:
 					case TokenType.EOF:
 						return false;
 					default:
 						return true;
 				}
 			};
-			LinkedListNode<Token> currentnode = node;
-			BinaryNode<Token> cnode = this.HandleCommon(node);
 			
-			currentnode = HandleRigthSide(currentnode, cnode, func);
-			_roots.Push(cnode);
-			this.CheckRoot(cnode);
-			
-			return currentnode;
+			return this.HandleBinaryOperation(node, func);
 		}
 		
 		private LinkedListNode<Token> HandleAndOr(LinkedListNode<Token> node)
@@ -151,14 +156,8 @@ namespace TextToCalcExpression
 						return true;
 				}
 			};
-			LinkedListNode<Token> currentnode = node;
-			BinaryNode<Token> cnode = this.HandleCommon(node);
 			
-			currentnode = HandleRigthSide(currentnode, cnode, func);
-			_roots.Push(cnode);
-			this.CheckRoot(cnode);
-			
-			return currentnode;
+			return this.HandleBinaryOperation(node, func);
 		}
 		
 		private LinkedListNode<Token> HandleComparisons(LinkedListNode<Token> node)
@@ -180,9 +179,14 @@ namespace TextToCalcExpression
 						return true;
 				}
 			};
+			
+			return this.HandleBinaryOperation(node, func);
+		}
+		
+		private LinkedListNode<Token> HandleBinaryOperation(LinkedListNode<Token> node, Func<LinkedListNode<Token>,bool> func)
+		{
 			LinkedListNode<Token> currentnode = node;
 			BinaryNode<Token> cnode = this.HandleCommon(node);
-			
 			currentnode = HandleRigthSide(currentnode, cnode, func);
 			_roots.Push(cnode);
 			this.CheckRoot(cnode);
@@ -306,25 +310,15 @@ namespace TextToCalcExpression
 		
 		private IEnumerable<Token> GetParExpressionTokens(LinkedListNode<Token> node, Func<LinkedListNode<Token>,bool> func)
 		{
-			LinkedListNode<Token> current = node;
-			int level = 1;
-				
-			while (func(current) || level > 0)
+			bool tfirst = true;
+			
+			foreach (var item in GetRightSideExpressionTokens(node, func, 1))
 			{
-				if (current.Value.TToken != TokenType.STARTPAR || level > 1)
-					yield return current.Value;
-				
-				current = current.Next;
-			
-				if (current.Value.TToken == TokenType.STARTPAR)
-					level++;
-				else if (current.Value.TToken == TokenType.ENDPAR)
-					level--;
+				if (!tfirst)
+					yield return item;
+				else
+					tfirst = false;
 			}
-			
-			_current = current;
-			
-			yield return new EofToken();
 		}
 		
 		#endregion

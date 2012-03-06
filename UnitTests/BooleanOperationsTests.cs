@@ -39,5 +39,55 @@ namespace UnitTests
 			
 			Assert.IsFalse(func(true, false, false));
 		}
+		
+		[Test]
+		public void TupleANDWithComparisonEquals_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<bool,bool, bool>> expression = builder.Create<Func<bool,bool, bool>>("A==A AND B==B");
+			Func<bool,bool, bool> func = expression.Compile();
+			
+			Assert.IsTrue(func(true, false));
+		}
+		
+		[Test]
+		public void TupleANDWithORComparisonMixedEquals_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<bool,bool, bool>> expression = builder.Create<Func<bool,bool, bool>>("A==A AND A!=B OR B==B");
+			Func<bool,bool, bool> func = expression.Compile();
+			
+			Assert.IsTrue(func(true, false));
+		}
+		
+		[Test]
+		public void TupleANDWithComparisonMixedParentesisEquals_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<bool,bool, bool>> expression = builder.Create<Func<bool,bool, bool>>("A==A AND (A!=B OR B==B)");
+			Func<bool,bool, bool> func = expression.Compile();
+			
+			Assert.IsTrue(func(true, false));
+		}
+		
+		[Test]
+		public void TupleANDComparison_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int,int, bool>> expression = builder.Create<Func<int,int, bool>>("A <= B AND B > 1");
+			Func<int,int, bool> func = expression.Compile();
+			
+			Assert.IsTrue(func(1, 3));
+		}
+		
+		[Test]
+		public void TupleANDArithmeticWithComparison_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int,int, bool>> expression = builder.Create<Func<int,int, bool>>("A + 1 <= B AND B > 1");
+			Func<int,int, bool> func = expression.Compile();
+			
+			Assert.IsTrue(func(1, 3));
+		}
 	}
 }
