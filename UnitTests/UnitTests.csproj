@@ -31,10 +31,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit-console-runner">
-      <HintPath>..\..\..\..\..\..\Program Files\SharpDevelop\4.2\bin\Tools\NUnit\lib\nunit-console-runner.dll</HintPath>
+      <HintPath>..\Dependencies\NUnit\nunit-console-runner.dll</HintPath>
     </Reference>
     <Reference Include="NUnit.Framework">
-      <HintPath>$(SharpDevelopBinPath)\Tools\NUnit\NUnit.Framework.dll</HintPath>
+      <HintPath>..\Dependencies\NUnit\NUnit.Framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
