@@ -59,29 +59,31 @@ namespace TextToCalcExpression.Tokens
 				}
 				else if (IsBoolOperationSymbol(item.ToString()))
 				{
-					yield return curr;
-					curr = item.ToString();
-				}
-				else if (IsBoolOperationSymbol(curr))
-				{
-					if (IsBoolOperationSymbol(curr+item))
+					if (!IsBoolOperationSymbol(curr))
 					{
-						yield return curr+item;
-						curr = string.Empty;
-					}
-					else
-					{
-						yield return curr;
+						if (curr != string.Empty)
+							yield return curr;
+							
 						curr = item.ToString();
 					}
+					else
+						curr +=item;
 				}
-				else if (item == ' ')
+				else if (item == ' ' && curr !=string.Empty)
 				{
 					yield return curr;
 					curr = string.Empty;
 				}
 				else
+				{
+					if (IsBoolOperationSymbol(curr))
+					{
+						yield return curr;
+						curr = string.Empty;
+					}
+					
 					curr += item;
+				}
 			}
 			
 			if (curr != string.Empty)
@@ -114,7 +116,7 @@ namespace TextToCalcExpression.Tokens
 				case "!=":
 				case "<":
 				case ">":
-				case "=<":
+				case "<=":
 				case ">=":
 				case "!":
 				case "=":

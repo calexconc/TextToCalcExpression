@@ -120,7 +120,7 @@ namespace TextToCalcExpression.Tokens
 					return TokenType.LOWER;
 				case ">":
 					return TokenType.GREATER;
-				case "=<":
+				case "<=":
 					return TokenType.LOWEROREQUALS;
 				case ">=":
 					return TokenType.GREATEROREQUALS;

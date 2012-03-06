@@ -278,7 +278,7 @@ namespace TextToCalcExpression
 				}
 			};
 			
-			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node, func, 0));
+			TokenTree ntree = new TokenTree(GetRightSideExpressionTokens(node.Next, func, 0));
 			LinkedListNode<Token> currnode = _current.Previous;
 			
 			cnode.Right = ntree.Root;

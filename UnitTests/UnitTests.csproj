@@ -50,6 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArithmeticTests.cs" />
     <Compile Include="BooleanOperationsTests.cs" />
     <Compile Include="ComparisonOperationsTests.cs" />
     <Compile Include="Program.cs" />
