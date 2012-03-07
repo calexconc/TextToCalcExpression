@@ -43,14 +43,14 @@ namespace TextToCalcExpression
 					break;
 				case TokenType.AND:
 				case TokenType.OR:
-					currentnode = HandleAndOr(node);
+					currentnode = this.HandleAndOr(node);
 					break;
 				case TokenType.NOT:
+					currentnode = this.HandleNot(node);
 					break;
 				case TokenType.POW: 
-					currentnode = HandlePow(node);
-					break;
 				case TokenType.REM:
+					currentnode = this.HandlePowRem(node);
 					break;
 				case TokenType.EQUALS:
 				case TokenType.NOTEQUALS:
@@ -58,10 +58,10 @@ namespace TextToCalcExpression
 				case TokenType.GREATEROREQUALS:
 				case TokenType.LOWER:
 				case TokenType.LOWEROREQUALS:
-					currentnode = HandleComparisons(currentnode);
+					currentnode = this.HandleComparisons(currentnode);
 					break;
 				case TokenType.STARTPAR: 
-					currentnode = HandleStarPar(currentnode);
+					currentnode = this.HandleStarPar(currentnode);
 					break;
 				case TokenType.ENDPAR: 
 					break;
@@ -100,6 +100,7 @@ namespace TextToCalcExpression
 					case TokenType.SUB:
 					case TokenType.AND:
 					case TokenType.OR:
+					case TokenType.NOT:
 					case TokenType.EQUALS:
 					case TokenType.NOTEQUALS:
 					case TokenType.GREATER:
@@ -116,7 +117,7 @@ namespace TextToCalcExpression
 			return this.HandleBinaryOperation(node, func);
 		}
 		
-		private LinkedListNode<Token> HandlePow(LinkedListNode<Token> node)
+		private LinkedListNode<Token> HandlePowRem(LinkedListNode<Token> node)
 		{
 			Func<LinkedListNode<Token>,bool> func = inode => { 
 				switch (inode.Value.TToken)
@@ -125,8 +126,11 @@ namespace TextToCalcExpression
 					case TokenType.SUB:
 					case TokenType.MULT:
 					case TokenType.DIV:
+					case TokenType.REM:
+					case TokenType.POW:
 					case TokenType.AND:
 					case TokenType.OR:
+					case TokenType.NOT:
 					case TokenType.EQUALS:
 					case TokenType.NOTEQUALS:
 					case TokenType.GREATER:
@@ -141,6 +145,23 @@ namespace TextToCalcExpression
 			};
 			
 			return this.HandleBinaryOperation(node, func);
+		}
+		
+		private LinkedListNode<Token> HandleNot(LinkedListNode<Token> node)
+		{
+			Func<LinkedListNode<Token>,bool> func = inode => { 
+				switch (inode.Value.TToken)
+				{
+					case TokenType.AND:
+					case TokenType.OR:
+					case TokenType.EOF:
+						return false;
+					default:
+						return true;
+				}
+			};
+			
+			return this.HandleUnaryOperation(node, func);
 		}
 		
 		private LinkedListNode<Token> HandleAndOr(LinkedListNode<Token> node)
@@ -183,6 +204,17 @@ namespace TextToCalcExpression
 			return this.HandleBinaryOperation(node, func);
 		}
 		
+		private LinkedListNode<Token> HandleUnaryOperation(LinkedListNode<Token> node, Func<LinkedListNode<Token>,bool> func)
+		{
+			LinkedListNode<Token> currentnode = node;
+			BinaryNode<Token> cnode = this.HandleCommonUnary(node);
+			currentnode = HandleRigthSide(currentnode, cnode, func);
+			_roots.Push(cnode);
+			this.CheckRoot(cnode);
+			
+			return currentnode;
+		}
+		
 		private LinkedListNode<Token> HandleBinaryOperation(LinkedListNode<Token> node, Func<LinkedListNode<Token>,bool> func)
 		{
 			LinkedListNode<Token> currentnode = node;
@@ -192,6 +224,14 @@ namespace TextToCalcExpression
 			this.CheckRoot(cnode);
 			
 			return currentnode;
+		}
+		
+		private BinaryNode<Token> HandleCommonUnary(LinkedListNode<Token> node)
+		{
+			LinkedListNode<Token> currentnode = node;
+			BinaryNode<Token> cnode = this.CreateNode(node.Value);
+			
+			return cnode;
 		}
 		
 		private BinaryNode<Token> HandleCommon(LinkedListNode<Token> node)

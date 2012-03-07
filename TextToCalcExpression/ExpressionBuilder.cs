@@ -184,7 +184,7 @@ namespace TextToCalcExpression
 		
 		private Expression DefineNot(BinaryNode<Token> node)
 		{
-			return BinaryExpression.Negate(ProcessToken(node.Right));
+			return BinaryExpression.Not(ProcessToken(node.Right));
 		}
 		
 		private Expression DefineNotEqual(BinaryNode<Token> node)

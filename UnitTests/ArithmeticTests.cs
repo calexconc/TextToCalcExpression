@@ -62,6 +62,16 @@ namespace UnitTests
 		}
 		
 		[Test]
+		public void TwoArgsRemainder_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int,int, int>> expression = builder.Create<Func<int,int, int>>("A % B");
+			Func<int,int, int> func = expression.Compile();
+			
+			Assert.AreEqual(func(5, 2), 1);
+		}
+		
+		[Test]
 		public void Poli3ArgsFunction_Test()
 		{
 			ExpressionBuilder builder = new ExpressionBuilder();
@@ -119,6 +129,16 @@ namespace UnitTests
 			Func<int,int, int> func = expression.Compile();
 			
 			Assert.AreEqual(func(2, 3), 29);
+		}
+		
+		[Test]
+		public void TwoMixedArgsRemainder_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int,int, int>> expression = builder.Create<Func<int,int, int>>("(A + 1) % B + 2");
+			Func<int,int, int> func = expression.Compile();
+			
+			Assert.AreEqual(func(8, 3), 2);
 		}
 	}
 }

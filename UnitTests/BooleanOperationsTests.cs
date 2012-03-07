@@ -20,6 +20,26 @@ namespace UnitTests
 		}
 		
 		[Test]
+		public void TupleAndNot_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<bool,bool, bool>> expression = builder.Create<Func<bool,bool, bool>>("A AND NOT B");
+			Func<bool,bool, bool> func = expression.Compile();
+			
+			Assert.IsFalse(func(true, true));
+		}
+		
+		[Test]
+		public void TupleAndNotOR_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<bool,bool, bool>> expression = builder.Create<Func<bool,bool, bool>>("A AND NOT B OR A");
+			Func<bool,bool, bool> func = expression.Compile();
+			
+			Assert.IsTrue(func(true, true));
+		}
+		
+		[Test]
 		public void TupleOR_Test()
 		{
 			ExpressionBuilder builder = new ExpressionBuilder();
@@ -38,6 +58,16 @@ namespace UnitTests
 			Func<bool,bool, bool, bool> func = expression.Compile();
 			
 			Assert.IsFalse(func(true, false, false));
+		}
+		
+		[Test]
+		public void TupleLogicMix2_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<bool,bool, bool, bool>> expression = builder.Create<Func<bool,bool, bool, bool>>("A OR NOT(B AND C)");
+			Func<bool,bool, bool, bool> func = expression.Compile();
+			
+			Assert.IsTrue(func(true, false, false));
 		}
 		
 		[Test]
