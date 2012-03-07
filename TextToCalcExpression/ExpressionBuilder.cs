@@ -214,6 +214,7 @@ namespace TextToCalcExpression
 		
 		private Expression DefineLowerOrEqual(BinaryNode<Token> node)
 		{
+			
 			return BinaryExpression.LessThanOrEqual(ProcessToken(node.Left), ProcessToken(node.Right));
 		}
 		
@@ -228,6 +229,95 @@ namespace TextToCalcExpression
 			else
 				return Expression.Convert(exp, _returnType.ParameterType);
 		}
+		
+		private Expression DefineCos(BinaryNode<Token> node)
+		{
+			MethodInfo info = typeof(Math).GetMethod("Cos");
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+		}
+		
+		private Expression DefineCosh(BinaryNode<Token> node)
+		{
+			MethodInfo info = typeof(Math).GetMethod("Cosh");
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+		}
+		
+		private Expression DefineSin(BinaryNode<Token> node)
+		{
+			MethodInfo info = typeof(Math).GetMethod("Sin");
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+		}
+		
+		private Expression DefineSinh(BinaryNode<Token> node)
+		{
+			MethodInfo info = typeof(Math).GetMethod("Sinh");
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+		}
+		
+		private Expression DefineTan(BinaryNode<Token> node)
+		{
+			MethodInfo info = typeof(Math).GetMethod("Tan");
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+		}
+		
+		private Expression DefineTanh(BinaryNode<Token> node)
+		{
+			MethodInfo info = typeof(Math).GetMethod("Tanh");
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+		}
+		
+		private Expression DefineExp(BinaryNode<Token> node)
+		{
+			MethodInfo info = typeof(Math).GetMethod("Exp");
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+		}
+		
+		private Expression DefineLN(BinaryNode<Token> node)
+		{
+			MethodInfo info = typeof(Math).GetMethod("Exp", new Type[] { typeof(double) } );
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+		}
+		
 		
 		#endregion
 	}

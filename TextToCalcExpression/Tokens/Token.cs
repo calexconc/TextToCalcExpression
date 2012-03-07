@@ -6,7 +6,8 @@ namespace TextToCalcExpression.Tokens
 	
 	public enum TokenType { NUM = 0, PAR = 1, SUM = 2, SUB = 3, MULT = 4, DIV = 5, REM = 6, POW = 7, STARTPAR = 8, ENDPAR = 9,
 		AND = 10, OR = 11, NOT = 12, EQUALS = 13, NOTEQUALS = 14, LOWER = 15, GREATER = 16, LOWEROREQUALS = 17, GREATEROREQUALS = 18
-			,BOOL = 19, EOF = 256}
+			,BOOL = 19, EXP = 20, LN = 21, COS = 22, SIN = 23, TAN = 24, COSH = 25, SINH = 26, TANH = 27,
+		EOF = 256}
 	public enum TokenGroup { Operator = 0, Identifier = 1, Literal = 2, Separator = 3 }
 	
 	/// <summary>
