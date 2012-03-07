@@ -48,6 +48,16 @@ namespace TextToCalcExpression
 				case TokenType.NOT:
 					currentnode = this.HandleNot(node);
 					break;
+				case TokenType.EXP:
+				case TokenType.LN:
+				case TokenType.COS:
+				case TokenType.COSH:
+				case TokenType.SIN:
+				case TokenType.SINH:
+				case TokenType.TAN:
+				case TokenType.TANH:
+					currentnode = this.HandleFunction(node);
+					break;
 				case TokenType.POW: 
 				case TokenType.REM:
 					currentnode = this.HandlePowRem(node);
@@ -101,6 +111,14 @@ namespace TextToCalcExpression
 					case TokenType.AND:
 					case TokenType.OR:
 					case TokenType.NOT:
+					case TokenType.EXP:
+					case TokenType.LN:
+					case TokenType.COS:
+					case TokenType.COSH:
+					case TokenType.SIN:
+					case TokenType.SINH:
+					case TokenType.TAN:
+					case TokenType.TANH:
 					case TokenType.EQUALS:
 					case TokenType.NOTEQUALS:
 					case TokenType.GREATER:
@@ -131,6 +149,14 @@ namespace TextToCalcExpression
 					case TokenType.AND:
 					case TokenType.OR:
 					case TokenType.NOT:
+					case TokenType.EXP:
+					case TokenType.LN:
+					case TokenType.COS:
+					case TokenType.COSH:
+					case TokenType.SIN:
+					case TokenType.SINH:
+					case TokenType.TAN:
+					case TokenType.TANH:
 					case TokenType.EQUALS:
 					case TokenType.NOTEQUALS:
 					case TokenType.GREATER:
@@ -154,6 +180,44 @@ namespace TextToCalcExpression
 				{
 					case TokenType.AND:
 					case TokenType.OR:
+					case TokenType.EOF:
+						return false;
+					default:
+						return true;
+				}
+			};
+			
+			return this.HandleUnaryOperation(node, func);
+		}
+		
+		private LinkedListNode<Token> HandleFunction(LinkedListNode<Token> node)
+		{
+			Func<LinkedListNode<Token>,bool> func = inode => { 
+				switch (inode.Value.TToken)
+				{
+					case TokenType.SUM:
+					case TokenType.SUB:
+					case TokenType.MULT:
+					case TokenType.DIV:
+					case TokenType.REM:
+					case TokenType.POW:
+					case TokenType.EXP:
+					case TokenType.LN:
+					case TokenType.COS:
+					case TokenType.COSH:
+					case TokenType.SIN:
+					case TokenType.SINH:
+					case TokenType.TAN:
+					case TokenType.TANH:
+					case TokenType.AND:
+					case TokenType.OR:
+					case TokenType.NOT:
+					case TokenType.EQUALS:
+					case TokenType.NOTEQUALS:
+					case TokenType.GREATER:
+					case TokenType.GREATEROREQUALS:
+					case TokenType.LOWER:
+					case TokenType.LOWEROREQUALS:
 					case TokenType.EOF:
 						return false;
 					default:

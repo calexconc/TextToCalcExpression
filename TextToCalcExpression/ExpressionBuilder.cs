@@ -84,6 +84,20 @@ namespace TextToCalcExpression
 					return DefineLowerOrEqual(node);
 				case TokenType.REM: 
 					return DefineRemainder(node);
+				case TokenType.EXP:
+					return DefineExp(node);
+				case TokenType.LN:
+					return DefineLN(node);
+				case TokenType.COS:
+					return DefineCos(node);
+				case TokenType.COSH:
+					return DefineCosh(node);
+				case TokenType.SIN:
+					return DefineSin(node);
+				case TokenType.TAN:
+					return DefineTan(node);
+				case TokenType.TANH:
+					return DefineTanh(node);	
 				case TokenType.PAR: 
 					return CreateParameter(node.Value);
 				case TokenType.NUM: 

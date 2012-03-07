@@ -50,6 +50,14 @@ namespace TextToCalcExpression.Tokens
 				case TokenType.GREATEROREQUALS:
 				case TokenType.LOWER:
 				case TokenType.LOWEROREQUALS:
+				case TokenType.EXP:
+				case TokenType.LN:
+				case TokenType.COS:
+				case TokenType.COSH:
+				case TokenType.SIN:
+				case TokenType.SINH:
+				case TokenType.TAN:
+				case TokenType.TANH:
 					token = new OperatorToken(ttype);
 					break;
 				case TokenType.STARTPAR:
@@ -131,6 +139,22 @@ namespace TextToCalcExpression.Tokens
 					return TokenType.OR;
 				case "NOT":
 					return TokenType.NOT;
+				case "EXP":
+					return TokenType.EXP;
+				case "LN":
+					return TokenType.LN;
+				case "COS":
+					return TokenType.COS;
+				case "COSH":
+					return TokenType.COSH;
+				case "SIN":
+					return TokenType.SIN;
+				case "SINH":
+					return TokenType.SINH;
+				case "TAN":
+					return TokenType.TAN;
+				case "TANH":
+					return TokenType.TANH;
 				case "":
 					return TokenType.EOF;
 				default:
