@@ -140,5 +140,35 @@ namespace UnitTests
 			
 			Assert.AreEqual(func(8, 3), 2);
 		}
+		
+		[Test]
+		public void TwoMixedArgsSignal_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int,int, int>> expression = builder.Create<Func<int,int, int>>("-(A + 1) * (+B + 2)");
+			Func<int,int, int> func = expression.Compile();
+			
+			Assert.AreEqual(func(8, 3), -45);
+		}
+		
+		[Test]
+		public void TwoMixedArgsSignal2_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int,int, int>> expression = builder.Create<Func<int,int, int>>("-(A + 1) + (+B + 2)");
+			Func<int,int, int> func = expression.Compile();
+			
+			Assert.AreEqual(func(8, 3), -4);
+		}
+		
+		[Test]
+		public void TwoMixedArgsSignal3_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<double,double, double>> expression = builder.Create<Func<double,double, double>>("(A + 1)^-1 + (B + 2)");
+			Func<double,double, double> func = expression.Compile();
+			
+			Assert.AreEqual(func(1, 3), 5.5);
+		}
 	}
 }

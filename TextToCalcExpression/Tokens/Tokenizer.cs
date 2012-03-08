@@ -20,11 +20,20 @@ namespace TextToCalcExpression.Tokens
 		
 		public IEnumerable<Token> ExtractTokens()
 		{
+			bool start = true;
+			
 			foreach (string item in this.ScanText())
 			{
 				Token token = Token.Create(item);
 				
-				if (token.TToken == TokenType.PAR && ((ParToken)token).HasSignal())
+				if (start && token.TToken == TokenType.SUM)
+					;
+				else if (start && token.TToken == TokenType.SUB)
+				{
+					yield return Token.Create("-1");
+					yield return Token.Create("*");
+				}
+				else if (token.TToken == TokenType.PAR && ((ParToken)token).HasSignal())
 				{
 					ParToken ptoken = (ParToken)token;
 					
@@ -33,6 +42,11 @@ namespace TextToCalcExpression.Tokens
 				}
 				else
 					yield return token;
+				
+				if (token.TToken == TokenType.STARTPAR)
+					start = true;
+				else
+					start = false;
 			}
 			
 			yield return Token.Create("");
@@ -45,26 +59,42 @@ namespace TextToCalcExpression.Tokens
 		private IEnumerable<string> ScanText()
 		{
 			string curr = string.Empty;
+			string curr_signal = string.Empty;
+			bool start = true;
 			
 			foreach (char item in this._text)
 			{
-				if (IsMathOperationSymbol(item))
+				if (IsOperationSymbol(item.ToString()))
 				{
-					if (curr != string.Empty)
-						yield return curr;
-					
-					yield return item.ToString();
-					
-					curr = string.Empty;
-				}
-				else if (IsBoolOperationSymbol(item.ToString()))
-				{
-					if (!IsBoolOperationSymbol(curr))
+					if (!IsOperationSymbol(curr))
 					{
 						if (curr != string.Empty)
 							yield return curr;
-							
+						
+						if (start && IsSignalSymbol(item.ToString()))
+							yield return item.ToString();
+						else
+							curr = item.ToString();
+					}
+					else if (curr==")")
+					{
+						yield return curr;
 						curr = item.ToString();
+					}
+					else if (IsOperationSymbol(curr+item))
+					{
+						curr +=item;
+						yield return curr;
+						
+						curr = string.Empty;
+					}
+					else if (IsSignalSymbol(item.ToString()))
+					{
+						if (item == '-')
+							curr_signal = item.ToString();
+						if (curr != string.Empty)
+							yield return curr;
+						curr = string.Empty;
 					}
 					else
 						curr +=item;
@@ -76,42 +106,52 @@ namespace TextToCalcExpression.Tokens
 				}
 				else if (item != ' ')
 				{
-					if (IsBoolOperationSymbol(curr))
+					if (IsOperationSymbol(curr))
 					{
 						yield return curr;
 						curr = string.Empty;
 					}
 					
+					if (curr == string.Empty && curr_signal != string.Empty)
+					{
+						curr += curr_signal;
+						curr_signal = string.Empty;
+					}
+					
 					curr += item;
 				}
+				
+				start = false;
 			}
 			
 			if (curr != string.Empty)
 				yield return curr;
 		}
 		
-		private bool IsMathOperationSymbol(char value)
+		private bool IsSignalSymbol(string value)
 		{
 			switch (value)
 			{
-				case '+':
-				case '-':
-				case '*':
-				case '/':
-				case '%':
-				case '(':
-				case ')':
-				case '^':
+				case "+":
+				case "-":
 					return true;
 				default:
 					return false;
-			}		
+			}	
 		}
 		
-		private bool IsBoolOperationSymbol(string value)
+		private bool IsOperationSymbol(string value)
 		{
 			switch (value)
 			{
+				case "+":
+				case "-":
+				case "*":
+				case "/":
+				case "%":
+				case "(":
+				case ")":
+				case "^":
 				case "==":
 				case "!=":
 				case "<":

@@ -151,7 +151,12 @@ namespace TextToCalcExpression
 			else
 			{
 				NumToken tok = (NumToken) token;
-				return Expression.Constant(tok.GetValue(), tok.ParameterType);
+				Expression exp = Expression.Constant(tok.GetValue(), tok.ParameterType);
+				
+				if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+					return exp;
+				else
+					return Expression.Convert(exp, _returnType.ParameterType);
 			}
 		}
 		
@@ -177,8 +182,9 @@ namespace TextToCalcExpression
 		
 		private Expression DefinePow(BinaryNode<Token> node)
 		{
-			Expression exp = BinaryExpression.Power(Expression.Convert(ProcessToken(node.Left), typeof(double))
-			                              , Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			Expression left = Expression.Convert(ProcessToken(node.Left), typeof(double));
+			Expression right = Expression.Convert(ProcessToken(node.Right), typeof(double));
+			Expression exp = BinaryExpression.Power(left, right);
 			
 			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
 				return exp;

@@ -53,6 +53,7 @@
     <Compile Include="ArithmeticTests.cs" />
     <Compile Include="BooleanOperationsTests.cs" />
     <Compile Include="ComparisonOperationsTests.cs" />
+    <Compile Include="FunctionsTests.cs" />
     <Compile Include="ParseErrorsTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
