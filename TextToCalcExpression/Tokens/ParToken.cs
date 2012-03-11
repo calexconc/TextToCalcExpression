@@ -37,9 +37,11 @@ namespace TextToCalcExpression.Tokens
 				yield break;
 			else
 			{
+				yield return Token.Create("(");
 				yield return Token.Create(this.Text[0] + "1");
 				yield return Token.Create("*");
 				yield return Token.Create(this.Text.Substring(1));
+				yield return Token.Create(")");
 			}
 		}
 		

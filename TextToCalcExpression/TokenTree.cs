@@ -111,14 +111,6 @@ namespace TextToCalcExpression
 					case TokenType.AND:
 					case TokenType.OR:
 					case TokenType.NOT:
-					case TokenType.EXP:
-					case TokenType.LN:
-					case TokenType.COS:
-					case TokenType.COSH:
-					case TokenType.SIN:
-					case TokenType.SINH:
-					case TokenType.TAN:
-					case TokenType.TANH:
 					case TokenType.EQUALS:
 					case TokenType.NOTEQUALS:
 					case TokenType.GREATER:

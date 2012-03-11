@@ -9,12 +9,171 @@ namespace TextToCalcExpression.Tokens
 	/// </summary>
 	public class Tokenizer
 	{
-		private string _text;
+		private string _current;
+		private bool _start;
+		private Queue<char> _queue;
 		
 		public Tokenizer(string text)
 		{
-			this._text = text;
+			this._current = string.Empty;
+			this._start = true;
+			this._queue = new Queue<char>(text);
 		}
+		
+		#region new implementation
+		
+		private IEnumerable<string> ScanText()
+		{
+			if (_queue.Count > 0)
+			{
+				char curr = _queue.Dequeue();
+				IEnumerable<string> strtokens = null;
+				
+				if (IsOperationSymbol(curr.ToString()))
+					strtokens = this.ProcessOperators(curr);
+				else if (curr == ' ')
+					strtokens = this.ProcessSpace(curr);
+				else
+					strtokens = this.ProcessChar(curr);
+				
+				foreach (string item in strtokens)
+					yield return item;
+			}
+			else if (_current !=string.Empty)
+			{
+				yield return _current;
+				_current = string.Empty;
+			}
+		}
+		
+		private IEnumerable<string> ProcessOperators(char curr)
+		{
+			IEnumerable<string> strtokens = null;
+			
+			if (curr == '(')
+				strtokens = this.ProcessStartParentesis(curr);
+			else if (_current!=string.Empty && IsOperationSymbol(_current+curr))
+			{
+				yield return _current+curr;
+				_current = string.Empty;
+			}
+			else if (IsOperationSymbol(_current) 
+			         && this.IsSignalSymbol(curr.ToString()))
+			{
+				if (_current != ")")
+					_start = true;
+				
+				yield return _current;
+				_current = string.Empty;
+				
+				strtokens = this.ProcessSignal(curr);
+			}
+			else if (this.IsSignalSymbol(curr.ToString()))
+				strtokens = this.ProcessSignal(curr);
+			else if (_current!=string.Empty)
+			{
+				yield return _current;
+				_current = curr.ToString();
+			}
+			else
+				_current += curr;
+			
+			if (strtokens != null)
+			{
+				foreach (string item in strtokens)
+					yield return item;
+			}
+		
+			foreach (string item in ScanText())
+				yield return item;
+		}
+		
+		private IEnumerable<string> ProcessStartParentesis(char curr)
+		{
+			if (_current != string.Empty)
+			{
+				yield return _current;
+				_current = string.Empty;	
+			}
+			
+			_start = true;
+			yield return curr.ToString();
+		}
+		
+		private IEnumerable<string> ProcessSignal(char curr)
+		{
+			if (_current != string.Empty)
+			{
+				if (IsFunction(_current))
+				{
+					_start = true;
+					
+					if (_current.StartsWith("-"))
+					{
+						yield return "-1";
+						yield return "*";
+						_current = _current.Substring(1);
+					}
+				}
+				
+				yield return _current;
+				
+				_current = string.Empty;
+			}
+			
+			if (_start && curr == '-')
+				_current += curr;
+			else if (!_start)
+				yield return curr.ToString();
+		}
+		
+		private IEnumerable<string> ProcessSpace(char curr)
+		{
+			if (_current != string.Empty && !IsSignalSymbol(_current))
+			{
+				if (IsFunction(_current))
+				{
+					_start = true;
+					
+					if (_current.StartsWith("-"))
+					{
+						yield return "-1";
+						yield return "*";
+						_current = _current.Substring(1);
+					}
+				}
+				
+				yield return _current;
+				    
+				_current = string.Empty;
+			}
+			
+			foreach (string item in ScanText())
+				yield return item;
+		}
+		
+		private IEnumerable<string> ProcessChar(char curr)
+		{
+			if (_current != string.Empty &&
+					IsOperationSymbol(_current) && !IsSignalSymbol(_current))
+			{
+				yield return _current;
+				_current = string.Empty;
+			}
+			else if (!_start && IsSignalSymbol(_current))
+			{
+				yield return _current;
+				_current = string.Empty;
+			}
+			
+			_current += curr;
+			_start = false;
+		
+			foreach (string item in ScanText())
+				yield return item;
+		}
+		
+		#endregion
 		
 		#region public members
 		
@@ -56,78 +215,6 @@ namespace TextToCalcExpression.Tokens
 		
 		#region private methods
 		
-		private IEnumerable<string> ScanText()
-		{
-			string curr = string.Empty;
-			string curr_signal = string.Empty;
-			bool start = true;
-			
-			foreach (char item in this._text)
-			{
-				if (IsOperationSymbol(item.ToString()))
-				{
-					if (!IsOperationSymbol(curr))
-					{
-						if (curr != string.Empty)
-							yield return curr;
-						
-						if (start && IsSignalSymbol(item.ToString()))
-							yield return item.ToString();
-						else
-							curr = item.ToString();
-					}
-					else if (curr==")")
-					{
-						yield return curr;
-						curr = item.ToString();
-					}
-					else if (IsOperationSymbol(curr+item))
-					{
-						curr +=item;
-						yield return curr;
-						
-						curr = string.Empty;
-					}
-					else if (IsSignalSymbol(item.ToString()))
-					{
-						if (item == '-')
-							curr_signal = item.ToString();
-						if (curr != string.Empty)
-							yield return curr;
-						curr = string.Empty;
-					}
-					else
-						curr +=item;
-				}
-				else if (item == ' ' && curr !=string.Empty)
-				{
-					yield return curr;
-					curr = string.Empty;
-				}
-				else if (item != ' ')
-				{
-					if (IsOperationSymbol(curr))
-					{
-						yield return curr;
-						curr = string.Empty;
-					}
-					
-					if (curr == string.Empty && curr_signal != string.Empty)
-					{
-						curr += curr_signal;
-						curr_signal = string.Empty;
-					}
-					
-					curr += item;
-				}
-				
-				start = false;
-			}
-			
-			if (curr != string.Empty)
-				yield return curr;
-		}
-		
 		private bool IsSignalSymbol(string value)
 		{
 			switch (value)
@@ -137,7 +224,27 @@ namespace TextToCalcExpression.Tokens
 					return true;
 				default:
 					return false;
-			}	
+			}
+		}
+		
+		private bool IsFunction(string value)
+		{
+			string xvalue = value.StartsWith("-") ? value.Substring(1) : value;
+			
+			switch (xvalue)
+			{
+				case "EXP":
+				case "LN":
+				case "COS":
+				case "COSH":
+				case "SIN":
+				case "SINH":
+				case "TAN":
+				case "TANH":
+					return true;
+				default:
+					return false;
+			}
 		}
 		
 		private bool IsOperationSymbol(string value)
@@ -167,7 +274,5 @@ namespace TextToCalcExpression.Tokens
 		}
 		
 		#endregion
-		
-		
 	}
 }
