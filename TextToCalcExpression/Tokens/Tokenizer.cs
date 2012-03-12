@@ -241,6 +241,9 @@ namespace TextToCalcExpression.Tokens
 				case "SINH":
 				case "TAN":
 				case "TANH":
+				case "SQRT":
+				case "ABS":
+				case "LOG10":
 					return true;
 				default:
 					return false;

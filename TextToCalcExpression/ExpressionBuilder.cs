@@ -97,7 +97,13 @@ namespace TextToCalcExpression
 				case TokenType.TAN:
 					return DefineTan(node);
 				case TokenType.TANH:
-					return DefineTanh(node);	
+					return DefineTanh(node);
+				case TokenType.SQRT:
+					return DefineSQRT(node);
+				case TokenType.LOG10:
+					return DefineLOG10(node);
+				case TokenType.ABS:
+					return DefineAbs(node);
 				case TokenType.PAR: 
 					return CreateParameter(node.Value);
 				case TokenType.NUM: 
@@ -338,6 +344,38 @@ namespace TextToCalcExpression
 				return Expression.Convert(exp, _returnType.ParameterType);
 		}
 		
+		private Expression DefineSQRT(BinaryNode<Token> node)
+		{
+			MethodInfo info = typeof(Math).GetMethod("Sqrt", new Type[] { typeof(double) } );
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+		}
+		
+		private Expression DefineLOG10(BinaryNode<Token> node)
+		{
+			MethodInfo info = typeof(Math).GetMethod("Log10", new Type[] { typeof(double) } );
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+		}
+		
+		private Expression DefineAbs(BinaryNode<Token> node)
+		{
+			MethodInfo info = typeof(Math).GetMethod("Abs", new Type[] { typeof(double) } );
+			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+		}
 		
 		#endregion
 	}

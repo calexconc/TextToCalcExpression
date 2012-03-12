@@ -56,6 +56,9 @@ namespace TextToCalcExpression
 				case TokenType.SINH:
 				case TokenType.TAN:
 				case TokenType.TANH:
+				case TokenType.LOG10:
+				case TokenType.ABS:
+				case TokenType.SQRT:
 					currentnode = this.HandleFunction(node);
 					break;
 				case TokenType.POW: 
@@ -149,6 +152,9 @@ namespace TextToCalcExpression
 					case TokenType.SINH:
 					case TokenType.TAN:
 					case TokenType.TANH:
+					case TokenType.LOG10:
+					case TokenType.ABS:
+					case TokenType.SQRT:
 					case TokenType.EQUALS:
 					case TokenType.NOTEQUALS:
 					case TokenType.GREATER:
@@ -201,6 +207,9 @@ namespace TextToCalcExpression
 					case TokenType.SINH:
 					case TokenType.TAN:
 					case TokenType.TANH:
+					case TokenType.LOG10:
+					case TokenType.ABS:
+					case TokenType.SQRT:
 					case TokenType.AND:
 					case TokenType.OR:
 					case TokenType.NOT:
