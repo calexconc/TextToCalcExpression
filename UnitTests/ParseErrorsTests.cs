@@ -8,7 +8,7 @@ namespace UnitTests
 	[TestFixture]
 	public class ParseErrorsTests
 	{
-		[Test]
+	//	[Test]
 		public void TestMethod()
 		{
 			ExpressionBuilder builder = new ExpressionBuilder();

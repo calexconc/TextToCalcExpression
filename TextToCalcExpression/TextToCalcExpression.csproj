@@ -46,6 +46,7 @@
     <Compile Include="ParseException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tokens\BoolToken.cs" />
+    <Compile Include="Tokens\ConstantToken.cs" />
     <Compile Include="Tokens\EndParToken.cs" />
     <Compile Include="Tokens\EofToken.cs" />
     <Compile Include="Tokens\NumToken.cs" />

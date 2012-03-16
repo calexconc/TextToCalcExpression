@@ -108,6 +108,9 @@ namespace TextToCalcExpression
 					return CreateParameter(node.Value);
 				case TokenType.NUM: 
 				case TokenType.BOOL: 
+					return CreateLiteral(node.Value);
+				case TokenType.PI: 
+				case TokenType.E: 
 					return CreateConstant(node.Value);
 				case TokenType.STARTPAR: 
 					break;
@@ -147,7 +150,7 @@ namespace TextToCalcExpression
 			}
 		}
 		
-		private Expression CreateConstant(Token token)
+		private Expression CreateLiteral(Token token)
 		{
 			if (token.TToken == TokenType.BOOL)
 			{
@@ -165,6 +168,17 @@ namespace TextToCalcExpression
 					return Expression.Convert(exp, _returnType.ParameterType);
 			}
 		}
+		
+		private Expression CreateConstant(Token token)
+		{
+			ConstantToken tok = (ConstantToken) token;
+			Expression exp = Expression.Constant(tok.GetValue(), tok.ParameterType);
+			
+			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))
+				return exp;
+			else
+				return Expression.Convert(exp, _returnType.ParameterType);
+			}
 		
 		private Expression DefineSum(BinaryNode<Token> node)
 		{
@@ -335,7 +349,7 @@ namespace TextToCalcExpression
 		
 		private Expression DefineLN(BinaryNode<Token> node)
 		{
-			MethodInfo info = typeof(Math).GetMethod("Exp", new Type[] { typeof(double) } );
+			MethodInfo info = typeof(Math).GetMethod("Log", new Type[] { typeof(double) } );
 			Expression exp = BinaryExpression.Call(info, Expression.Convert(ProcessToken(node.Right), typeof(double)));
 			
 			if (_returnType.ParameterType == typeof(void) || _returnType.ParameterType == typeof(bool))

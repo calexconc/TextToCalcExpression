@@ -250,6 +250,20 @@ namespace TextToCalcExpression.Tokens
 			}
 		}
 		
+		private bool IsConstant(string value)
+		{
+			string xvalue = value.StartsWith("-") ? value.Substring(1) : value;
+			
+			switch (xvalue)
+			{
+				case "PI":
+				case "E":
+					return true;
+				default:
+					return false;
+			}
+		}
+		
 		private bool IsOperationSymbol(string value)
 		{
 			switch (value)

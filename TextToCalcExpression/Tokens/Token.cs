@@ -7,7 +7,8 @@ namespace TextToCalcExpression.Tokens
 	public enum TokenType { NUM = 0, PAR = 1, SUM = 2, SUB = 3, MULT = 4, DIV = 5, REM = 6, POW = 7, STARTPAR = 8, ENDPAR = 9,
 		AND = 10, OR = 11, NOT = 12, EQUALS = 13, NOTEQUALS = 14, LOWER = 15, GREATER = 16, LOWEROREQUALS = 17, GREATEROREQUALS = 18
 			,BOOL = 19, EXP = 20, LN = 21, COS = 22, SIN = 23, TAN = 24, COSH = 25, SINH = 26, TANH = 27, ABS = 28, SQRT = 29, LOG10 = 30,
-		EOF = 256}
+			PI = 31, E = 32,
+			EOF = 256}
 	public enum TokenGroup { Operator = 0, Identifier = 1, Literal = 2, Separator = 3 }
 	
 	/// <summary>
@@ -77,6 +78,10 @@ namespace TextToCalcExpression.Tokens
 					break;
 				case TokenType.BOOL:
 					token = new BoolToken(value);
+					break;
+				case TokenType.PI:
+				case TokenType.E:
+					token = new ConstantToken(ttype);
 					break;
 				case TokenType.EOF:
 					token = new EofToken();
@@ -164,6 +169,10 @@ namespace TextToCalcExpression.Tokens
 					return TokenType.LOG10;
 				case "ABS":
 					return TokenType.ABS;
+				case "PI":
+					return TokenType.PI;
+				case "E":
+					return TokenType.E;
 				case "":
 					return TokenType.EOF;
 				default:
