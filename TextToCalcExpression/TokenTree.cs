@@ -80,6 +80,7 @@ namespace TextToCalcExpression
 					break;
 				case TokenType.PAR:
 				case TokenType.NUM:
+				case TokenType.BOOL:
 				case TokenType.PI:
 				case TokenType.E:
 					this.HandleParConst(node.Value);
