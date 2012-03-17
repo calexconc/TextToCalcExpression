@@ -403,7 +403,10 @@ namespace TextToCalcExpression
 			{
 				yield return current.Value;
 				
-				current = current.Next;
+				if (current.Next!=null)
+					current = current.Next;
+				else if (level > 0)
+					throw new ParseException("Invalid expression, parentesis not closed!");
 			
 				if (current.Value.TToken == TokenType.STARTPAR)
 					level++;

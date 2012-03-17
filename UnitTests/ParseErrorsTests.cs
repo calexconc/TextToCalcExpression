@@ -8,16 +8,52 @@ namespace UnitTests
 	[TestFixture]
 	public class ParseErrorsTests
 	{
-	//	[Test]
-		public void TestMethod()
+		[Test]
+		[ExpectedException(typeof(ParseException))]
+		public void EmptyExpression_Test()
 		{
+			
 			ExpressionBuilder builder = new ExpressionBuilder();
-			Expression<Func<bool,bool, bool>> expression = builder.Create<Func<bool,bool, bool>>("A AND B+1");
-			Func<bool,bool, bool> func = expression.Compile();
+			Expression<Func<bool>> expression = builder.Create<Func<bool>>("");
+			Func<bool> func = expression.Compile();
 			
-	//		Assert.Throws(
+			Assert.IsTrue(func());
+		}
+		
+		[Test]
+		[ExpectedException(typeof(ParseException))]
+		public void EmptyParentesisExpression_Test()
+		{
 			
-			Assert.IsTrue(func(true, true));
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int>> expression = builder.Create<Func<int>>("2+1+()-1");
+			Func<int> func = expression.Compile();
+			
+			Assert.AreEqual(func(), 0);
+		}
+		
+		[Test]
+		[ExpectedException(typeof(ParseException))]
+		public void EmptyParentesisExpression2_Test()
+		{
+			
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int>> expression = builder.Create<Func<int>>("2+1+(-1");
+			Func<int> func = expression.Compile();
+			
+			Assert.AreEqual(func(), 0);
+		}
+		
+		[Test]
+		[ExpectedException(typeof(ParseException))]
+		public void EmptyParentesisExpression3_Test()
+		{
+			
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<int>> expression = builder.Create<Func<int>>("2+1+(2+1*(5)");
+			Func<int> func = expression.Compile();
+			
+			Assert.AreEqual(func(), 0);
 		}
 	}
 }

@@ -39,6 +39,8 @@ namespace TextToCalcExpression.Tokens
 				foreach (string item in strtokens)
 					yield return item;
 			}
+			else if (_queue.Count == 0 && _start)
+				throw new ParseException("Invalid expression!");
 			else if (_current !=string.Empty)
 			{
 				yield return _current;
@@ -49,6 +51,9 @@ namespace TextToCalcExpression.Tokens
 		private IEnumerable<string> ProcessOperators(char curr)
 		{
 			IEnumerable<string> strtokens = null;
+			
+			if (curr == ')' && _start)
+				throw new ParseException("Empty expression within parentesis!");
 			
 			if (curr == '(')
 				strtokens = this.ProcessStartParentesis(curr);
@@ -292,6 +297,24 @@ namespace TextToCalcExpression.Tokens
 				case "!":
 				case "=":
 					return true;
+				case "$":
+				case "#":
+				case "&":
+				case "|":
+				case "\\":
+				case "\"":
+				case "\'":
+				case "?":
+				case "»":
+				case "«":
+				case "~":
+				case ";":
+				case ":":
+				case "€":
+				case "£":
+				case "{":
+				case "}":
+					throw new ParseException(string.Format("Invalid character in expression -> {0}", value));
 				default:
 					return false;
 			}		
