@@ -81,7 +81,7 @@ namespace TextToCalcExpression.Tokens
 					break;
 				case TokenType.PI:
 				case TokenType.E:
-					token = new ConstantToken(ttype);
+					token = new ConstantToken(ttype, value);
 					break;
 				case TokenType.EOF:
 					token = new EofToken();
@@ -169,8 +169,10 @@ namespace TextToCalcExpression.Tokens
 					return TokenType.LOG10;
 				case "ABS":
 					return TokenType.ABS;
+				case "-PI":
 				case "PI":
 					return TokenType.PI;
+				case "-E":
 				case "E":
 					return TokenType.E;
 				case "":

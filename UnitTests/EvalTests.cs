@@ -29,6 +29,26 @@ namespace UnitTests
 		}
 		
 		[Test]
+		public void EvaluateConstantValue_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<double>> expression = builder.Create<Func<double>>("-PI");
+			Func<double> func = expression.Compile();
+			
+			Assert.AreEqual(func(), -1*Math.PI);
+		}
+		
+		[Test]
+		public void EvaluateConstantValue2_Test()
+		{
+			ExpressionBuilder builder = new ExpressionBuilder();
+			Expression<Func<double>> expression = builder.Create<Func<double>>("E-E");
+			Func<double> func = expression.Compile();
+			
+			Assert.AreEqual(func(), 0);
+		}
+		
+		[Test]
 		public void EvaluateNumericalOperation_Test()
 		{
 			ExpressionBuilder builder = new ExpressionBuilder();

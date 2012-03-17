@@ -8,10 +8,10 @@ namespace TextToCalcExpression.Tokens
 	/// </summary>
 	public class ConstantToken : Token
 	{
-		public ConstantToken(TokenType ttype)
+		public ConstantToken(TokenType ttype, string text)
 		{
 			this._ttoken = ttype;
-			this.Text = ttype.ToString();
+			this.Text = text;
 			this.ParameterType = typeof(double);
 		}
 		

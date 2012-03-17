@@ -199,6 +199,13 @@ namespace TextToCalcExpression.Tokens
 					foreach (Token xitem in ptoken.Decompose())
 						yield return xitem;
 				}
+				else if ((token.TToken == TokenType.PI || token.TToken == TokenType.E) && ((ConstantToken)token).HasSignal())
+				{
+					ConstantToken ptoken = (ConstantToken)token;
+					
+					foreach (Token xitem in ptoken.Decompose())
+						yield return xitem;
+				}
 				else
 					yield return token;
 				
